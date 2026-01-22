@@ -1,0 +1,7 @@
+{
+    "Hudson": {"password": "123", "rating": 1500, "is_admin": true},
+    "Wiley": {"password": "123", "rating": 1500, "is_admin": false},
+    "Jayden": {"password": "123", "rating": 1500, "is_admin": false},
+    "Ethan": {"password": "123", "rating": 1500, "is_admin": false},
+    "Zoe": {"password": "123", "rating": 1500, "is_admin": false}
+}

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brainrot Judge</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; background: #f4f4f4; }
+        .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h1 { color: #333; display: inline-block; }
+        
+        /* Timer Styles */
+        .timer-box { float: right; background: #333; color: #fff; padding: 10px 15px; border-radius: 5px; font-family: monospace; font-size: 1.2em; }
+        .timer-ended { background: #d9534f; }
+        
+        select, input[type=file], button, input[type=text], input[type=password] { width: 100%; padding: 10px; margin-bottom: 15px; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; font-size: 1.1em; }
+        button:hover { background: #0056b3; }
+        
+        /* Resources List Styles */
+        .resources-list { margin-bottom: 20px; padding: 15px; background: #e9ecef; border-radius: 4px; border-left: 5px solid #007bff; }
+        .resources-list h3 { margin-top: 0; margin-bottom: 10px; font-size: 1.1em; color: #333; }
+        .resources-list ul { list-style-type: none; padding: 0; margin: 0; }
+        .resources-list li { margin-bottom: 8px; }
+        .resources-list a { text-decoration: none; font-weight: bold; color: #007bff; }
+        .resources-list a:hover { text-decoration: underline; }
+        
+        .editorial-link { color: #28a745 !important; margin-left: 10px; }
+        .locked { color: #6c757d; cursor: not-allowed; margin-left: 10px; font-size: 0.9em; }
+
+        /* Results Table */
+        .results-box { margin-bottom: 20px; padding: 15px; background: #e8f5e9; border-radius: 4px; border-left: 5px solid #28a745; }
+        .res-table { width: 100%; border-collapse: collapse; }
+        .res-table th { text-align: left; padding: 5px; border-bottom: 1px solid #ccc; }
+        .res-table td { padding: 5px; }
+        .verdict-AC { color: green; font-weight: bold; }
+        .verdict-WA { color: red; font-weight: bold; }
+        .verdict-TLE { color: orange; font-weight: bold; }
+        .verdict-CE { color: #d4a017; font-weight: bold; }
+
+        /* Header */
+        .user-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .leaderboard-btn { background: #ffc107; color: #000; padding: 8px 15px; border-radius: 4px; text-decoration: none; font-weight: bold; margin-left: 10px; }
+        .leaderboard-btn:hover { background: #e0a800; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% if not logged_in %}
+            <!-- LOGIN SCREEN -->
+            <h1>Brainrot Judge Login 🧠</h1>
+            <p>Please log in to participate.</p>
+            <form action="/login" method="post">
+                <label>Username:</label>
+                <input type="text" name="username" placeholder="Hudson, Wiley, Jayden, Ethan, Zoe" required>
+                
+                <label>Password:</label>
+                <input type="password" name="password" placeholder="Enter password" required>
+                
+                <button type="submit">Login</button>
+            </form>
+        {% else %}
+            <!-- DASHBOARD SCREEN -->
+            <div class="user-header">
+                <div>
+                    Logged in as: <strong>{{ username }}</strong>
+                    <a href="/leaderboard" class="leaderboard-btn">🏆 View Leaderboard</a>
+                </div>
+                <a href="/logout" style="color: #dc3545; text-decoration: none;">Logout</a>
+            </div>
+
+            <div id="timerDisplay" class="timer-box">Loading...</div>
+            <h1>Brainrot Judge 🧠</h1>
+            <p>Submit your solutions to the contest.</p>
+            
+            <!-- 1. My Results Dashboard -->
+            <div class="results-box">
+                <h3>My Recent Submissions</h3>
+                {% if submissions %}
+                <table class="res-table">
+                    <tr>
+                        <th>Time</th>
+                        <th>Problem</th>
+                        <th>Verdict</th>
+                        <th>Score</th>
+                    </tr>
+                    {% for sub in submissions %}
+                    <tr>
+                        <td>{{ sub.time }}</td>
+                        <td>Problem {{ sub.problem }}</td>
+                        <td class="verdict-{{ sub.verdict }}">{{ sub.verdict }}</td>
+                        <!-- Check if score key exists to handle old data format gracefully -->
+                        <td>{{ sub.score if sub.score is defined else '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% else %}
+                <p>No submissions yet. Good luck!</p>
+                {% endif %}
+            </div>
+
+            <!-- 2. Problem Statements -->
+            <div class="resources-list">
+                <h3>Problem Materials</h3>
+                <ul>
+                    {% for p in problems %}
+                    <li>
+                        <strong>Problem {{ p.id }}</strong> ({{ p.points }} pts)
+                        {% if p.has_pdf %}
+                            - <a href="/problem/{{ p.id }}/pdf" target="_blank">📄 Statement</a>
+                        {% else %}
+                            <span style="color: #6c757d; font-size: 0.9em;">(No Statement)</span>
+                        {% endif %}
+
+                        {% if p.has_editorial %}
+                            {% if is_contest_over %}
+                                <a href="/problem/{{ p.id }}/editorial" target="_blank" class="editorial-link">🔓 Editorial</a>
+                            {% else %}
+                                <span class="locked">🔒 Editorial (Hidden)</span>
+                            {% endif %}
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <!-- 3. Submission Form -->
+            <form action="/submit" method="post" enctype="multipart/form-data">
+                <label>Select Problem to Submit For:</label>
+                <select name="problem_id" id="problem_select">
+                    {% for p in problems %}
+                    <option value="{{ p.id }}">
+                        Problem {{ p.id }} ({{ p.points }} pts)
+                    </option>
+                    {% endfor %}
+                </select>
+                
+                <label>Upload C++ File (.cpp):</label>
+                <input type="file" name="code_file" accept=".cpp" required>
+                
+                <button type="submit">Submit Solution</button>
+            </form>
+        {% endif %}
+    </div>
+
+    {% if logged_in %}
+    <script>
+        // --- Timer Logic ---
+        let remainingSeconds = {{ time_remaining }};
+        const isContestOver = {{ 'true' if is_contest_over else 'false' }};
+        const timerDisplay = document.getElementById('timerDisplay');
+
+        function updateTimer() {
+            if (remainingSeconds <= 0) {
+                timerDisplay.innerText = "CONTEST ENDED";
+                timerDisplay.classList.add('timer-ended');
+                if (!isContestOver) location.reload(); // Reload to enable editorials when time hits 0
+                return;
+            }
+
+            const h = Math.floor(remainingSeconds / 3600);
+            const m = Math.floor((remainingSeconds % 3600) / 60);
+            const s = remainingSeconds % 60;
+
+            timerDisplay.innerText = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            remainingSeconds--;
+            setTimeout(updateTimer, 1000);
+        }
+        updateTimer();
+    </script>
+    {% endif %}
+</body>
+</html>

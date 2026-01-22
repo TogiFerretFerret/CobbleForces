@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <style>
+        body { font-family: sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; background: #f0f0f0; }
+        .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h1, h2 { color: #333; }
+        .section { margin-bottom: 30px; border-bottom: 1px solid #ccc; padding-bottom: 20px; }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        input, select { padding: 8px; width: 100%; max-width: 400px; margin-bottom: 10px; }
+        button { background: #007bff; color: white; padding: 10px 15px; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #0056b3; }
+        button.danger { background: #dc3545; }
+        button.danger:hover { background: #c82333; }
+        .msg { padding: 10px; margin-bottom: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" style="float:right;">← Back to Home</a>
+        <h1>Admin Dashboard 🛠️</h1>
+        
+        {% if msg %}
+            <div class="msg {{ msg_type }}">{{ msg }}</div>
+        {% endif %}
+
+        <div class="section">
+            <h2>Contest Control</h2>
+            <form action="/admin/update_contest" method="post">
+                <label>Start Time (Timestamp):</label>
+                <input type="number" name="start_time" value="{{ contest_state.start_time }}">
+                
+                <label>End Time (Timestamp):</label>
+                <input type="number" name="end_time" value="{{ contest_state.end_time }}">
+                <small>Current Time: {{ current_time }}</small>
+                <br><br>
+                <button type="submit">Update Times</button>
+            </form>
+            <br>
+            <form action="/admin/reset_contest" method="post" onsubmit="return confirm('Are you sure? This deletes ALL submissions.');">
+                <button type="submit" class="danger">⚠️ Reset Contest (Clear Submissions)</button>
+            </form>
+        </div>
+
+        <div class="section">
+            <h2>User Management</h2>
+            <form action="/admin/add_user" method="post">
+                <input type="text" name="username" placeholder="Username" required style="width: 150px; display: inline-block;">
+                <input type="text" name="password" placeholder="Password" required style="width: 150px; display: inline-block;">
+                <label style="display:inline;"><input type="checkbox" name="is_admin" style="width:auto;"> Admin?</label>
+                <button type="submit">Add User</button>
+            </form>
+            
+            <table>
+                <tr>
+                    <th>Username</th>
+                    <th>Rating</th>
+                    <th>Role</th>
+                    <th>Action</th>
+                </tr>
+                {% for u, data in users.items() %}
+                <tr>
+                    <td>{{ u }}</td>
+                    <td>{{ data.rating }}</td>
+                    <td>{{ 'Admin' if data.is_admin else 'User' }}</td>
+                    <td>
+                        {% if u != current_user %}
+                        <form action="/admin/delete_user" method="post" style="display:inline;">
+                            <input type="hidden" name="username" value="{{ u }}">
+                            <button type="submit" class="danger" style="padding: 2px 5px; font-size: 0.8em;">Delete</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        
+        <div class="section">
+            <h2>Problem Management</h2>
+            <p>To add problems, upload a folder or zip manually to the server's <code>problems/</code> directory for now.</p>
+            <p>Detected Problems: {{ problems|join(', ') }}</p>
+        </div>
+    </div>
+</body>
+</html>

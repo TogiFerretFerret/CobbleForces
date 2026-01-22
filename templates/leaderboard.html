@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard - Brainrot Judge</title>
+    <style>
+        body { font-family: sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; background: #f4f4f4; }
+        .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h1 { color: #333; display: inline-block; }
+        .back-link { float: right; margin-top: 20px; text-decoration: none; color: #007bff; font-weight: bold; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: center; }
+        th { background: #333; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        
+        .rank-1 { background-color: #ffd700 !important; color: #000; font-weight: bold; } /* Gold */
+        .rank-2 { background-color: #c0c0c0 !important; font-weight: bold; } /* Silver */
+        .rank-3 { background-color: #cd7f32 !important; font-weight: bold; } /* Bronze */
+        
+        .score-cell { font-weight: bold; color: #28a745; }
+        .total-cell { font-size: 1.2em; color: #007bff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Dashboard</a>
+        <h1>🏆 Contest Leaderboard</h1>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 50px;">#</th>
+                    <th style="text-align: left;">User</th>
+                    <th>Total Score</th>
+                    <!-- Dynamic Problem Headers -->
+                    {% for p in problems %}
+                    <th>{{ p.id }} <br><span style="font-size:0.7em">({{ p.points }})</span></th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in leaderboard %}
+                <tr class="rank-{{ loop.index }}">
+                    <td>{{ loop.index }}</td>
+                    <td style="text-align: left;">{{ entry.username }}</td>
+                    <td class="total-cell">{{ entry.total_score }}</td>
+                    
+                    {% for p in problems %}
+                        {% set score = entry.breakdown.get(p.id, 0) %}
+                        <td class="score-cell">
+                            {% if score > 0 %}
+                                {{ score }}
+                            {% else %}
+                                <span style="color: #ccc;">-</span>
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

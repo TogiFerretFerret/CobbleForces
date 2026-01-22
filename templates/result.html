@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Submission Result</title>
+    <style>
+        body { font-family: monospace; max-width: 800px; margin: 2rem auto; padding: 0 1rem; background: #222; color: #ddd; }
+        .container { background: #333; padding: 2rem; border-radius: 8px; }
+        .verdict { font-size: 2em; font-weight: bold; margin-bottom: 10px; }
+        .score-display { font-size: 1.5em; margin-bottom: 20px; color: #fff; border-bottom: 1px solid #555; padding-bottom: 20px; }
+        .score-points { color: #007bff; }
+        
+        .AC { color: #0f0; }
+        .WA { color: #f00; }
+        .CE { color: #ff0; }
+        .TLE { color: #ffa500; }
+        .RE { color: #ffa500; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #555; padding: 8px; text-align: left; }
+        th { background: #444; }
+        
+        .back-btn { display: inline-block; margin-top: 30px; background: #007bff; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 4px; font-weight: bold; font-family: sans-serif; }
+        .back-btn:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Submission for Problem {{ problem_id }}</h1>
+        
+        <div class="verdict {{ result.verdict }}">
+            Verdict: {{ result.verdict }}
+        </div>
+        
+        <div class="score-display">
+            Score: <span class="score-points">{{ result.score }} / {{ result.max_points }}</span>
+        </div>
+
+        {% if result.verdict == 'CE' %}
+            <h3>Compilation Error:</h3>
+            <pre>{{ result.details }}</pre>
+        {% else %}
+            <table>
+                <tr>
+                    <th>Test Case</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                </tr>
+                {% for test in result.tests %}
+                <tr>
+                    <td>{{ test.case }}</td>
+                    <td class="{{ test.status }}">{{ test.status }}</td>
+                    <td>{{ test.time }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        <a href="/" class="back-btn">← Back to Dashboard</a>
+    </div>
+</body>
+</html>
