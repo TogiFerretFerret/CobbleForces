@@ -1,0 +1,258 @@
+{
+    "verdict": "AC",
+    "score": 100,
+    "max_points": 100,
+    "tests": [
+        {
+            "case": "001",
+            "status": "AC",
+            "time": "761 ms"
+        },
+        {
+            "case": "002",
+            "status": "AC",
+            "time": "769 ms"
+        },
+        {
+            "case": "003",
+            "status": "AC",
+            "time": "818 ms"
+        },
+        {
+            "case": "004",
+            "status": "AC",
+            "time": "814 ms"
+        },
+        {
+            "case": "005",
+            "status": "AC",
+            "time": "799 ms"
+        },
+        {
+            "case": "006",
+            "status": "AC",
+            "time": "812 ms"
+        },
+        {
+            "case": "007",
+            "status": "AC",
+            "time": "782 ms"
+        },
+        {
+            "case": "008",
+            "status": "AC",
+            "time": "754 ms"
+        },
+        {
+            "case": "009",
+            "status": "AC",
+            "time": "761 ms"
+        },
+        {
+            "case": "010",
+            "status": "AC",
+            "time": "815 ms"
+        },
+        {
+            "case": "011",
+            "status": "AC",
+            "time": "799 ms"
+        },
+        {
+            "case": "012",
+            "status": "AC",
+            "time": "805 ms"
+        },
+        {
+            "case": "013",
+            "status": "AC",
+            "time": "800 ms"
+        },
+        {
+            "case": "014",
+            "status": "AC",
+            "time": "782 ms"
+        },
+        {
+            "case": "015",
+            "status": "AC",
+            "time": "754 ms"
+        },
+        {
+            "case": "016",
+            "status": "AC",
+            "time": "777 ms"
+        },
+        {
+            "case": "017",
+            "status": "AC",
+            "time": "766 ms"
+        },
+        {
+            "case": "018",
+            "status": "AC",
+            "time": "806 ms"
+        },
+        {
+            "case": "019",
+            "status": "AC",
+            "time": "800 ms"
+        },
+        {
+            "case": "020",
+            "status": "AC",
+            "time": "802 ms"
+        },
+        {
+            "case": "021",
+            "status": "AC",
+            "time": "803 ms"
+        },
+        {
+            "case": "022",
+            "status": "AC",
+            "time": "761 ms"
+        },
+        {
+            "case": "023",
+            "status": "AC",
+            "time": "827 ms"
+        },
+        {
+            "case": "024",
+            "status": "AC",
+            "time": "799 ms"
+        },
+        {
+            "case": "025",
+            "status": "AC",
+            "time": "833 ms"
+        },
+        {
+            "case": "026",
+            "status": "AC",
+            "time": "836 ms"
+        },
+        {
+            "case": "027",
+            "status": "AC",
+            "time": "810 ms"
+        },
+        {
+            "case": "028",
+            "status": "AC",
+            "time": "774 ms"
+        },
+        {
+            "case": "029",
+            "status": "AC",
+            "time": "809 ms"
+        },
+        {
+            "case": "030",
+            "status": "AC",
+            "time": "763 ms"
+        },
+        {
+            "case": "031",
+            "status": "AC",
+            "time": "798 ms"
+        },
+        {
+            "case": "032",
+            "status": "AC",
+            "time": "777 ms"
+        },
+        {
+            "case": "033",
+            "status": "AC",
+            "time": "801 ms"
+        },
+        {
+            "case": "034",
+            "status": "AC",
+            "time": "769 ms"
+        },
+        {
+            "case": "035",
+            "status": "AC",
+            "time": "781 ms"
+        },
+        {
+            "case": "036",
+            "status": "AC",
+            "time": "780 ms"
+        },
+        {
+            "case": "037",
+            "status": "AC",
+            "time": "831 ms"
+        },
+        {
+            "case": "038",
+            "status": "AC",
+            "time": "777 ms"
+        },
+        {
+            "case": "039",
+            "status": "AC",
+            "time": "767 ms"
+        },
+        {
+            "case": "040",
+            "status": "AC",
+            "time": "801 ms"
+        },
+        {
+            "case": "041",
+            "status": "AC",
+            "time": "812 ms"
+        },
+        {
+            "case": "042",
+            "status": "AC",
+            "time": "813 ms"
+        },
+        {
+            "case": "043",
+            "status": "AC",
+            "time": "816 ms"
+        },
+        {
+            "case": "044",
+            "status": "AC",
+            "time": "789 ms"
+        },
+        {
+            "case": "045",
+            "status": "AC",
+            "time": "761 ms"
+        },
+        {
+            "case": "046",
+            "status": "AC",
+            "time": "787 ms"
+        },
+        {
+            "case": "047",
+            "status": "AC",
+            "time": "779 ms"
+        },
+        {
+            "case": "048",
+            "status": "AC",
+            "time": "754 ms"
+        },
+        {
+            "case": "049",
+            "status": "AC",
+            "time": "776 ms"
+        },
+        {
+            "case": "050",
+            "status": "AC",
+            "time": "804 ms"
+        }
+    ],
+    "status": "Finished"
+}

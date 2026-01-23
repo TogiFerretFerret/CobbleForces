@@ -292,17 +292,27 @@ def view_submission(sub_id):
         # Check for saved detailed result file
         res_path = os.path.join(UPLOAD_FOLDER, f'result_{sub_id}.json')
         if os.path.exists(res_path):
-            with open(res_path, 'r') as f:
-                result = json.load(f)
-        else:
-            # Fallback to summary in contest_data.json
-            data = contest_manager._load_data()
-            user_subs = data.get(session['username'], [])
-            for s in user_subs:
-                if s.get('id') == sub_id:
-                    result = s
+            try:
+                with open(res_path, 'r') as f:
+                    result = json.load(f)
+            except (json.JSONDecodeError, IOError):
+                # If file is empty or corrupted, we will fall back to summary below
+                result = None
+        
+    if not result:
+        # Fallback to summary in contest_data.json
+        data = contest_manager._load_data()
+        user_subs = data.get(session['username'], [])
+        for s in user_subs:
+            if s.get('id') == sub_id:
+                result = s
+                # If it's still 'Judging' in the file but not in memory, it might have crashed
+                if result['verdict'] == 'Judging':
+                    result['verdict'] = 'IE'
+                    result['status'] = 'Error'
+                else:
                     result['status'] = 'Finished'
-                    break
+                break
     
     if not result: abort(404)
     

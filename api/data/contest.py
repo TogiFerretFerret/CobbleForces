@@ -1,12 +1,14 @@
 import json
 import os
 import time
+import threading
 
 class ContestManager:
     def __init__(self, contests_file='api/data/contests.json', data_file='contest_data.json'):
         self.contests_file = contests_file
         self.data_file = data_file
         self.contests = self._load_contests()
+        self.lock = threading.RLock()
 
     def _load_contests(self):
         if os.path.exists(self.contests_file):
@@ -60,10 +62,11 @@ class ContestManager:
     # --- Submissions & Leaderboard ---
 
     def _load_data(self):
-        if not os.path.exists(self.data_file):
-            return {}
-        with open(self.data_file, 'r') as f:
-            data = json.load(f)
+        with self.lock:
+            if not os.path.exists(self.data_file):
+                return {}
+            with open(self.data_file, 'r') as f:
+                data = json.load(f)
         
         # Ensure IDs exist for all submissions
         modified = False
@@ -89,6 +92,13 @@ class ContestManager:
         return data
 
     def _save_data(self, data):
+        # Assumes lock is held by caller if called from _load_data, 
+        # but let's make it safe for direct calls too.
+        # Use a recursive lock style if needed, or just handle it carefully.
+        # Actually, let's just use the lock inside here and make sure callers don't nest.
+        # But _load_data calls _save_data... let's use a nested-safe approach.
+        # Simplest: check if we already hold the lock? No, threading.Lock isn't reentrant.
+        # Let's use threading.RLock instead.
         with open(self.data_file, 'w') as f:
             json.dump(data, f, indent=4)
 
@@ -100,29 +110,31 @@ class ContestManager:
         return user_subs
 
     def save_submission(self, username, contest_id, problem_id, verdict, score):
-        data = self._load_data()
-        if username not in data:
-            data[username] = []
-        
-        # Calculate sub ID robustly
-        max_id = 0
-        for user_subs in data.values():
-            for s in user_subs:
-                if 'id' in s:
-                    max_id = max(max_id, s['id'])
-        sub_id = max_id + 1
+        with self.lock:
+            data = json.load(open(self.data_file)) if os.path.exists(self.data_file) else {}
+            if username not in data:
+                data[username] = []
+            
+            # Calculate sub ID robustly
+            max_id = 0
+            for user_subs in data.values():
+                for s in user_subs:
+                    if 'id' in s:
+                        max_id = max(max_id, s['id'])
+            sub_id = max_id + 1
 
-        submission = {
-            'id': sub_id,
-            'time': time.strftime('%H:%M:%S'),
-            'timestamp': time.time(),
-            'contest_id': str(contest_id),
-            'problem': problem_id,
-            'verdict': verdict,
-            'score': score
-        }
-        data[username].insert(0, submission)
-        self._save_data(data)
+            submission = {
+                'id': sub_id,
+                'time': time.strftime('%H:%M:%S'),
+                'timestamp': time.time(),
+                'contest_id': str(contest_id),
+                'problem': problem_id,
+                'verdict': verdict,
+                'score': score
+            }
+            data[username].insert(0, submission)
+            with open(self.data_file, 'w') as f:
+                json.dump(data, f, indent=4)
         return sub_id
 
     def get_leaderboard(self, contest_id, all_users, user_manager=None):
