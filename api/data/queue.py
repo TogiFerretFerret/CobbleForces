@@ -5,7 +5,7 @@ import os
 import json
 
 class SubmissionQueue:
-    def __init__(self, validator, contest_manager, num_workers=4):
+    def __init__(self, validator, contest_manager, num_workers=8):
         self.validator = validator
         self.contest_manager = contest_manager
         self.queue = queue.Queue()
