@@ -61,11 +61,11 @@ body {
 .table-cf .user-cell { text-align: left; font-weight: bold; }
 
 /* Verdicts */
-.verdict-AC { color: #00a900; font-weight: bold; }
-.verdict-WA { color: red; font-weight: bold; }
-.verdict-TLE { color: #0000ff; font-weight: bold; } /* CF uses blue for TLE sometimes or just bold text */
-.verdict-RE { color: #0000ff; font-weight: bold; }
-.verdict-CE { color: #888; font-weight: bold; }
+.verdict-AC { color: #00a900 !important; font-weight: bold; }
+.verdict-WA { color: red !important; font-weight: bold; }
+.verdict-TLE { color: #0000ff !important; font-weight: bold; }
+.verdict-RE { color: #0000ff !important; font-weight: bold; }
+.verdict-CE { color: #888 !important; font-weight: bold; }
 
 /* Thematic Rating Styles (Culture Focused) */
 

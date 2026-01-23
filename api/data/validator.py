@@ -2,6 +2,7 @@ import os
 import subprocess
 import glob
 import resource
+import time
 
 class Validator:
     def __init__(self):
@@ -13,7 +14,7 @@ class Validator:
         # 512MB Memory
         resource.setrlimit(resource.RLIMIT_AS, (512 * 1024 * 1024, 512 * 1024 * 1024))
 
-    def judge_submission(self, source_path, contest_id, problem_id, max_points=100):
+    def judge_submission(self, source_path, contest_id, problem_id, max_points=100, on_test_complete=None):
         # 1. Compile
         exe_path = source_path + ".exe"
         compile_cmd = ["g++", "-O2", "-o", exe_path, source_path]
@@ -21,23 +22,28 @@ class Validator:
         try:
             subprocess.run(compile_cmd, check=True, capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
-            return {
+            res = {
                 "verdict": "CE",
                 "score": 0,
                 "max_points": max_points,
-                "details": e.stderr
+                "details": e.stderr,
+                "tests": []
             }
+            if on_test_complete: on_test_complete(res)
+            return res
 
         # 2. Find Test Cases
-        # Look in problems/<contest_id>/<problem_id>/
         problem_dir = os.path.join("problems", str(contest_id), problem_id)
         if not os.path.exists(problem_dir):
-             return {
-                "verdict": "IE", # Internal Error (Problem not found)
+             res = {
+                "verdict": "IE",
                 "score": 0,
                 "max_points": max_points,
-                "details": "Problem directory not found."
+                "details": "Problem directory not found.",
+                "tests": []
             }
+             if on_test_complete: on_test_complete(res)
+             return res
 
         inputs = sorted(glob.glob(os.path.join(problem_dir, "input_*.txt")))
         
@@ -73,8 +79,10 @@ class Validator:
                 input_data = f.read()
 
             status = "AC"
+            exec_time = 0
             
             try:
+                start_exec = time.time()
                 proc = subprocess.run(
                     sandbox_cmd, 
                     input=input_data, 
@@ -83,6 +91,7 @@ class Validator:
                     timeout=2.0,
                     preexec_fn=self._set_limits
                 )
+                exec_time = int((time.time() - start_exec) * 1000)
                 actual_output = proc.stdout.strip()
                 
                 if proc.returncode != 0:
@@ -107,28 +116,36 @@ class Validator:
             except Exception as e:
                 status = "RE"
                 
-            tests.append({
+            test_res = {
                 "case": test_case_num,
                 "status": status,
-                "time": "N/A"
-            })
+                "time": f"{exec_time} ms"
+            }
+            tests.append(test_res)
             
             if status == "AC":
                 passed_count += 1
             elif overall_verdict == "AC":
                 overall_verdict = status
+            
+            if on_test_complete:
+                on_test_complete({
+                    "verdict": overall_verdict,
+                    "score": int((passed_count / total_tests) * max_points) if total_tests > 0 else 0,
+                    "max_points": max_points,
+                    "tests": tests,
+                    "status": "Judging"
+                })
         
         if os.path.exists(exe_path):
             os.remove(exe_path)
 
-        if total_tests > 0:
-            score = int((passed_count / total_tests) * max_points)
-        else:
-            score = 0
-            
-        return {
+        score = int((passed_count / total_tests) * max_points) if total_tests > 0 else 0
+        final_res = {
             "verdict": overall_verdict if total_tests > 0 else "IE", 
             "score": score,
             "max_points": max_points,
-            "tests": tests
+            "tests": tests,
+            "status": "Finished"
         }
+        return final_res

@@ -105,10 +105,14 @@
                     <tbody>
                         {% for sub in submissions %}
                         <tr>
-                            <td class="text-muted small">{{ loop.index }}</td>
+                            <td class="text-muted small">
+                                <a href="/submission/{{ sub.id }}" class="text-decoration-none text-muted">#{{ sub.id }}</a>
+                            </td>
                             <td class="small">{{ sub.time }}</td>
                             <td>{{ sub.problem }}</td>
-                            <td class="verdict-{{ sub.verdict }} small">{{ sub.verdict }}</td>
+                            <td class="verdict-{{ sub.verdict }} small">
+                                <a href="/submission/{{ sub.id }}" class="text-decoration-none verdict-{{ sub.verdict }} fw-bold">{{ sub.verdict }}</a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

@@ -57,6 +57,28 @@ Icons are rendered using the `.perk-icon` class.
 - `🌸 Sakura Trick`: Hime status (Soft pink pulsing glow).
 - `🗡️ Protagonist Perk`: Common to all 3000+ tiers.
 
+## NQE (Not Quite Elo) Algorithm
+
+CobbleForces uses an asymmetric, inflationary rating system designed to make high ranks achievable while rewarding consistency.
+
+### 1. Calculation Phases
+- **Seed (Expected Rank):** Calculated using standard Elo win probability against all other participants.
+- **Performance Rating:** A binary search finds the rating value that would result in the user's actual rank.
+- **Drift Update:** Rating moves toward Performance Rating using a dynamic Stability Factor (K).
+
+### 2. Stability Factor (K)
+- **New Users (<= 10 contests):** `K = 0.5`
+- **Established Users:** `K = 0.2`
+- **Choke Protection:** If Performance < Current Rating, `K` is halved to reduce loss.
+
+### 3. Gamification & Bonuses
+- **Protagonist Bonus:** +5 flat for users < 1200 rating who solve at least one problem.
+- **Speedster Bonus:** +2 flat if average penalty per solved problem is < 20 minutes (indicated by ⚡ icon in standings).
+- **Activity Streak:** 1.1x multiplier on total rating change if participated in the last 3 consecutive contests.
+
+### 4. Rating Compression (Soft Cap)
+For ratings above 4000: `NewRating = 4000 + (RawNewRating - 4000) / 2`.
+
 ## Implementation Reference
 - **Logic:** `app.py` contains the `format_handle` filter for index-based color distribution.
 - **Styles:** `static/css/custom.css` defines the keyframes and tier classes.

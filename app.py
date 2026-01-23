@@ -2,12 +2,14 @@ import os
 import time
 import shutil
 import json
+import subprocess
 from flask import Flask, request, render_template, make_response, send_from_directory, abort, session, redirect, url_for, flash
 from markupsafe import Markup
 from api.data.users import UserManager
 from api.data.problem import ProblemManager
 from api.data.contest import ContestManager
 from api.data.validator import Validator
+from api.data.queue import SubmissionQueue
 
 app = Flask(__name__)
 app.secret_key = 'brainrot_secret_key_secure_admin_727' 
@@ -20,6 +22,7 @@ user_manager = UserManager()
 problem_manager = ProblemManager()
 contest_manager = ContestManager()
 validator = Validator()
+submission_queue = SubmissionQueue(validator, contest_manager)
 
 # --- CONTEXT PROCESSOR ---
 @app.context_processor
@@ -131,6 +134,10 @@ def format_datetime(value):
 @app.template_filter('datetime_local')
 def format_datetime_local(value):
     return time.strftime('%Y-%m-%dT%H:%M', time.localtime(value))
+
+@app.template_filter('exists')
+def file_exists(path):
+    return os.path.exists(path)
 
 # --- ADMIN DECORATOR ---
 def admin_required(f):
@@ -259,17 +266,46 @@ def submit():
     # Check if contest is running or if we allow practice
     # For now, allow always, but maybe mark differently?
     
-    filepath = os.path.join(UPLOAD_FOLDER, f"submit_{session['username']}_{contest_id}_{problem_id}.cpp")
+    filepath = os.path.join(UPLOAD_FOLDER, f"submit_{session['username']}_{contest_id}_{problem_id}_{int(time.time())}.cpp")
     file.save(filepath)
     
     problem = problem_manager.get_problem(contest_id, problem_id)
     if not problem: return "Invalid problem", 400
     
-    result = validator.judge_submission(filepath, contest_id, problem_id, max_points=100)
+    # Save initial submission record as 'Judging'
+    sub_id = contest_manager.save_submission(session['username'], contest_id, problem_id, 'Judging', 0)
     
-    contest_manager.save_submission(session['username'], contest_id, problem_id, result['verdict'], result['score'])
+    # Add to background queue
+    submission_queue.add_submission(sub_id, session['username'], filepath, contest_id, problem_id)
     
-    return render_template('result.html', result=result, problem_id=problem_id, contest_id=contest_id)
+    return redirect(url_for('view_submission', sub_id=sub_id))
+
+@app.route('/submission/')
+def submission_no_id():
+    return redirect(url_for('index'))
+
+@app.route('/submission/<int:sub_id>')
+def view_submission(sub_id):
+    if 'username' not in session: return redirect(url_for('index'))
+    
+    result = submission_queue.get_result(sub_id)
+    if not result:
+        # If not in active memory queue, check the file data (it might have finished long ago)
+        data = contest_manager._load_data()
+        user_subs = data.get(session['username'], [])
+        for s in user_subs:
+            if s.get('id') == sub_id:
+                result = s
+                result['status'] = 'Finished'
+                break
+    
+    if not result: abort(404)
+    
+    # If AJAX request, return JSON
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return result
+
+    return render_template('result.html', result=result, sub_id=sub_id)
 
 @app.route('/rankings')
 def rankings():
@@ -364,7 +400,68 @@ def edit_contest(contest_id):
         except Exception as e:
             return redirect(url_for('admin_dashboard', msg=f"Error parsing date: {e}", msg_type="error"))
             
-    return render_template('edit_contest.html', contest=contest)
+    problems = problem_manager.get_contest_problems(contest_id)
+    return render_template('edit_contest.html', contest=contest, problems=problems)
+
+@app.route('/admin/add_problem/<contest_id>', methods=['POST'])
+@admin_required
+def add_problem(contest_id):
+    problem_id = request.form.get('problem_id').upper()
+    if not problem_id:
+        return redirect(url_for('edit_contest', contest_id=contest_id, msg="Invalid Problem ID", msg_type="error"))
+    
+    problem_dir = os.path.join('problems', str(contest_id), problem_id)
+    if os.path.exists(problem_dir):
+        return redirect(url_for('edit_contest', contest_id=contest_id, msg="Problem already exists", msg_type="error"))
+    
+    os.makedirs(problem_dir, exist_ok=True)
+    return redirect(url_for('edit_contest', contest_id=contest_id, msg=f"Problem {problem_id} added!", msg_type="success"))
+
+@app.route('/admin/generate_testcases/<contest_id>/<problem_id>', methods=['POST'])
+@admin_required
+def generate_testcases(contest_id, problem_id):
+    problem = problem_manager.get_problem(contest_id, problem_id)
+    if not problem:
+        return redirect(url_for('edit_contest', contest_id=contest_id, msg="Problem not found", msg_type="error"))
+    
+    gen_path = os.path.join(problem.problem_dir, 'gen.cpp')
+    sol_path = os.path.join(problem.problem_dir, 'sol.cpp')
+    
+    if not os.path.exists(gen_path) or not os.path.exists(sol_path):
+        return redirect(url_for('edit_contest', contest_id=contest_id, msg="gen.cpp or sol.cpp missing", msg_type="error"))
+    
+    num_testcases = int(request.form.get('num_testcases', 10))
+    
+    try:
+        # Compile Generator
+        gen_exe = os.path.join(problem.problem_dir, 'gen.exe')
+        subprocess.run(['g++', '-O2', gen_path, '-o', gen_exe], check=True)
+        
+        # Compile Solution
+        sol_exe = os.path.join(problem.problem_dir, 'sol.exe')
+        subprocess.run(['g++', '-O2', sol_path, '-o', sol_exe], check=True)
+        
+        # Generate cases
+        for i in range(1, num_testcases + 1):
+            input_file = os.path.join(problem.problem_dir, f'input_{i:03d}.txt')
+            output_file = os.path.join(problem.problem_dir, f'output_{i:03d}.txt')
+            
+            # Run generator
+            with open(input_file, 'w') as f:
+                subprocess.run([gen_exe, str(i)], stdout=f, check=True)
+            
+            # Run solution
+            with open(input_file, 'r') as fin:
+                with open(output_file, 'w') as fout:
+                    subprocess.run([sol_exe], stdin=fin, stdout=fout, check=True)
+        
+        # Cleanup exes
+        if os.path.exists(gen_exe): os.remove(gen_exe)
+        if os.path.exists(sol_exe): os.remove(sol_exe)
+        
+        return redirect(url_for('edit_contest', contest_id=contest_id, msg=f"Generated {num_testcases} testcases for {problem_id}!", msg_type="success"))
+    except Exception as e:
+        return redirect(url_for('edit_contest', contest_id=contest_id, msg=f"Error generating testcases: {e}", msg_type="error"))
 
 @app.route('/admin/calculate_ratings', methods=['POST'])
 @admin_required

@@ -4,6 +4,13 @@
 
 {% block content %}
 <div class="col-md-8 mx-auto">
+    {% if request.args.get('msg') %}
+        <div class="alert alert-{{ 'success' if request.args.get('msg_type') == 'success' else 'danger' }} alert-dismissible fade show mb-4" role="alert">
+            {{ request.args.get('msg') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endif %}
+
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
             <h5 class="m-0">Edit Contest: {{ contest.name }}</h5>
@@ -29,6 +36,48 @@
                     <button type="submit" class="btn btn-primary px-5">Save Changes</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="m-0">Manage Problems</h5>
+            <form action="/admin/add_problem/{{ contest.id }}" method="post" class="d-flex gap-2">
+                <input type="text" name="problem_id" class="form-control form-control-sm" placeholder="ID (e.g. D)" style="width: 80px;" required>
+                <button type="submit" class="btn btn-sm btn-light">+ Add Problem</button>
+            </form>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle m-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">ID</th>
+                        <th>Rating</th>
+                        <th>Files</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in problems %}
+                    <tr>
+                        <td class="ps-3 fw-bold">{{ p.id }}</td>
+                        <td><span class="badge bg-secondary">{{ p.rating }}</span></td>
+                        <td>
+                            <small class="text-muted">
+                                gen.cpp: {{ '✅' if p.problem_dir ~ '/gen.cpp' | exists else '❌' }} |
+                                sol.cpp: {{ '✅' if p.problem_dir ~ '/sol.cpp' | exists else '❌' }}
+                            </small>
+                        </td>
+                        <td class="text-end pe-3">
+                            <form action="/admin/generate_testcases/{{ contest.id }}/{{ p.id }}" method="post" class="d-inline-flex align-items-center">
+                                <input type="number" name="num_testcases" class="form-control form-control-sm me-2" value="10" style="width: 60px;">
+                                <button type="submit" class="btn btn-sm btn-success">Generate Cases</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

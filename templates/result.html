@@ -7,52 +7,131 @@
     <div class="col-md-8">
         <div class="card shadow-lg mb-4">
             <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">Submission for Problem {{ problem_id }}</h4>
+                <h4 class="mb-0">Submission #{{ sub_id }}</h4>
                 <a href="/" class="btn btn-sm btn-outline-light">Back to Dashboard</a>
             </div>
             <div class="card-body text-center py-5">
-                <h1 class="display-1 verdict-{{ result.verdict }} mb-3">{{ result.verdict }}</h1>
-                <h4 class="text-muted">Score: <span class="text-primary">{{ result.score }}</span> / {{ result.max_points }}</h4>
+                <h1 class="display-1 verdict-{{ result.verdict }} mb-3" id="verdict-display">{{ result.verdict }}</h1>
+                <h4 class="text-muted" id="score-display">
+                    {% if result.status == 'Finished' or result.status == 'Error' %}
+                        Score: <span class="text-primary">{{ result.score }}</span> / {{ result.max_points or 100 }}
+                    {% else %}
+                        Please wait...
+                    {% endif %}
+                </h4>
+                
+                {% if result.status != 'Finished' and result.status != 'Error' %}
+                <div class="spinner-border text-primary mt-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                {% endif %}
             </div>
         </div>
 
-        {% if result.verdict == 'CE' %}
-        <div class="card border-warning mb-4">
-            <div class="card-header bg-warning text-dark">
-                <strong>⚠️ Compilation Error</strong>
+        <div id="details-area">
+            {% if result.verdict == 'CE' %}
+            <div class="card border-warning mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <strong>⚠️ Compilation Error</strong>
+                </div>
+                <div class="card-body bg-light">
+                    <pre class="m-0">{{ result.details }}</pre>
+                </div>
             </div>
-            <div class="card-body bg-light">
-                <pre class="m-0">{{ result.details }}</pre>
+            {% elif result.tests %}
+            
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <strong>Test Cases</strong>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Test Case</th>
+                                <th>Status</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for test in result.tests %}
+                            <tr>
+                                <td>#{{ test.case }}</td>
+                                <td class="verdict-{{ test.status }}">{{ test.status }}</td>
+                                <td>{{ test.time }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
+            {% endif %}
         </div>
-        {% else %}
-        
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <strong>Test Cases</strong>
-            </div>
-            <div class="card-body p-0">
-                <table class="table table-striped mb-0">
-                    <thead>
-                        <tr>
-                            <th>Test Case</th>
-                            <th>Status</th>
-                            <th>Time</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for test in result.tests %}
-                        <tr>
-                            <td>#{{ test.case }}</td>
-                            <td class="verdict-{{ test.status }}">{{ test.status }}</td>
-                            <td>{{ test.time }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{% if result.status != 'Finished' and result.status != 'Error' %}
+<script>
+    function checkStatus() {
+        fetch(window.location.pathname, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Update verdict and score
+            document.getElementById('verdict-display').innerText = data.verdict;
+            document.getElementById('verdict-display').className = `display-1 verdict-${data.verdict} mb-3`;
+            
+            if (data.status === 'Judging' || data.status === 'Finished') {
+                document.getElementById('score-display').innerHTML = `Score: <span class="text-primary">${data.score}</span> / ${data.max_points || 100}`;
+            }
+
+            // Update test cases table
+            if (data.tests && data.tests.length > 0) {
+                const detailsArea = document.getElementById('details-area');
+                let html = `
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <strong>Test Cases</strong>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Test Case</th>
+                                        <th>Status</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+                
+                data.tests.forEach(test => {
+                    html += `
+                        <tr>
+                            <td>#${test.case}</td>
+                            <td class="verdict-${test.status}">${test.status}</td>
+                            <td>${test.time}</td>
+                        </tr>`;
+                });
+
+                html += `</tbody></table></div></div>`;
+                detailsArea.innerHTML = html;
+            }
+
+            if (data.status === 'Finished' || data.status === 'Error') {
+                // If finished, maybe do one final reload to be sure or just stop polling
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                setTimeout(checkStatus, 1500);
+            }
+        })
+        .catch(err => console.error('Polling error:', err));
+    }
+    setTimeout(checkStatus, 1000);
+</script>
+{% endif %}
 {% endblock %}

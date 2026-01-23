@@ -63,7 +63,30 @@ class ContestManager:
         if not os.path.exists(self.data_file):
             return {}
         with open(self.data_file, 'r') as f:
-            return json.load(f)
+            data = json.load(f)
+        
+        # Ensure IDs exist for all submissions
+        modified = False
+        max_id = 0
+        
+        # First pass: find max ID
+        for user in data:
+            for sub in data[user]:
+                if 'id' in sub:
+                    max_id = max(max_id, sub['id'])
+        
+        # Second pass: assign missing IDs
+        for user in data:
+            for sub in data[user]:
+                if 'id' not in sub:
+                    max_id += 1
+                    sub['id'] = max_id
+                    modified = True
+        
+        if modified:
+            self._save_data(data)
+            
+        return data
 
     def _save_data(self, data):
         with open(self.data_file, 'w') as f:
@@ -73,9 +96,6 @@ class ContestManager:
         data = self._load_data()
         user_subs = data.get(username, [])
         if contest_id:
-            # Filter by contest_id
-            # Old submissions might not have contest_id, assume "1" or ignore?
-            # Let's assume strict filtering.
             return [s for s in user_subs if str(s.get('contest_id')) == str(contest_id)]
         return user_subs
 
@@ -84,7 +104,16 @@ class ContestManager:
         if username not in data:
             data[username] = []
         
+        # Calculate sub ID robustly
+        max_id = 0
+        for user_subs in data.values():
+            for s in user_subs:
+                if 'id' in s:
+                    max_id = max(max_id, s['id'])
+        sub_id = max_id + 1
+
         submission = {
+            'id': sub_id,
             'time': time.strftime('%H:%M:%S'),
             'timestamp': time.time(),
             'contest_id': str(contest_id),
@@ -94,6 +123,7 @@ class ContestManager:
         }
         data[username].insert(0, submission)
         self._save_data(data)
+        return sub_id
 
     def get_leaderboard(self, contest_id, all_users, user_manager=None):
         data = self._load_data()
