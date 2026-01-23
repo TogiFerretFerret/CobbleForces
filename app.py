@@ -171,6 +171,15 @@ def contest_dashboard(contest_id):
                            is_contest_over=is_contest_over,
                            submissions=user_subs)
 
+@app.route('/standings')
+def standings_redirect():
+    contests = contest_manager.get_all_contests()
+    if not contests:
+        return redirect(url_for('index'))
+    # get_all_contests already sorts by start_time descending
+    latest_id = contests[0]['id']
+    return redirect(url_for('contest_standings', contest_id=latest_id))
+
 @app.route('/contest/<contest_id>/standings')
 def contest_standings(contest_id):
     contest = contest_manager.get_contest(contest_id)
