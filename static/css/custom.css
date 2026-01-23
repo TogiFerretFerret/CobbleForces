@@ -67,34 +67,18 @@ body {
 .verdict-RE { color: #0000ff; font-weight: bold; }
 .verdict-CE { color: #888; font-weight: bold; }
 
-/* Advanced Rating Styles & Animations */
+/* Thematic Rating Styles (Culture Focused) */
 
-@keyframes pulse-gold {
-    0% { text-shadow: 0 0 5px #ffd700; }
-    50% { text-shadow: 0 0 20px #ffd700, 0 0 30px #ff8c00; }
-    100% { text-shadow: 0 0 5px #ffd700; }
+@keyframes subtle-pulse-purple {
+    0% { text-shadow: 0 0 2px #800080; }
+    50% { text-shadow: 0 0 8px #800080; }
+    100% { text-shadow: 0 0 2px #800080; }
 }
 
-@keyframes pulse-purple {
-    0% { text-shadow: 0 0 5px #800080; }
-    50% { text-shadow: 0 0 20px #800080, 0 0 30px #4b0082; }
-    100% { text-shadow: 0 0 5px #800080; }
-}
-
-@keyframes rainbow-text {
-    0% { color: #ff0000; }
-    15% { color: #ff8c00; }
-    30% { color: #ffff00; }
-    45% { color: #00ff00; }
-    60% { color: #0000ff; }
-    75% { color: #4b0082; }
-    90% { color: #ee82ee; }
-    100% { color: #ff0000; }
-}
-
-@keyframes sparkle {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; transform: scale(1.2); }
+@keyframes subtle-pulse-pink {
+    0% { text-shadow: 0 0 2px #ff69b4; }
+    50% { text-shadow: 0 0 8px #ff69b4; }
+    100% { text-shadow: 0 0 2px #ff69b4; }
 }
 
 .user-lurker { color: #555555 !important; font-weight: bold; }
@@ -108,28 +92,19 @@ body {
 .user-international-master { color: #ff8c00 !important; font-weight: bold; }
 .user-grandmaster { color: #ff0000 !important; font-weight: bold; }
 .user-legendary { color: #ff0000 !important; font-weight: bold; }
-.user-overlord { color: #d4af37 !important; font-weight: bold; }
 
-/* New Tiers Styles */
-.user-prophet { color: #00ffff !important; font-weight: bold; text-shadow: 0 0 8px #00ffff; }
-.user-celestial { color: #ffffff !important; font-weight: bold; text-shadow: 0 0 10px #add8e6, 0 0 20px #ffffff; }
-.user-god { color: #ffd700 !important; font-weight: bold; animation: pulse-gold 2s infinite; }
-.user-mythic { font-weight: bold; animation: rainbow-text 3s infinite linear; }
-
-/* Yaoi/Yuri Overhaul */
-.user-yaoi { font-weight: bold; animation: pulse-purple 1.5s infinite; }
-.user-yuri { font-weight: bold; text-shadow: 0 0 5px #ff69b4, 0 0 10px #ff1493; }
+/* Thematic High Tiers */
+.user-protagonist { color: #b8860b !important; font-weight: bold; border-bottom: 1px solid #ffd700; }
+.user-otaku { color: #008b8b !important; font-weight: bold; text-shadow: 1px 1px 0px #eee; }
+.user-hime { color: #db7093 !important; font-weight: bold; animation: subtle-pulse-pink 2s infinite; }
+.user-yaoi { font-weight: bold; animation: subtle-pulse-purple 1.5s infinite; }
+.user-yuri { font-weight: bold; } /* Animation handled via individual chars */
 
 .legendary-first { color: #000000 !important; }
 
 /* Perk Icons */
-.perk-icon {
-    font-size: 0.9em;
-    margin-left: 4px;
-    vertical-align: middle;
-}
-.crown-gold { color: #ffd700; text-shadow: 0 0 3px #000; }
-.star-silver { color: #c0c0c0; }
+.perk-icon { font-size: 0.9em; margin-left: 4px; vertical-align: middle; }
+.crown-gold { color: #ffd700; }
 
 /* Footer */
 .footer {

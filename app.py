@@ -54,12 +54,10 @@ def format_handle(username, rating=None):
     elif r < 2300: cls = "user-master"
     elif r < 2400: cls = "user-international-master"
     elif r < 2500: cls = "user-grandmaster"
-    elif r < 2750: cls = "user-legendary"
-    elif r < 3000: cls = "user-overlord"
-    elif r < 3200: cls = "user-prophet"
-    elif r < 3400: cls = "user-celestial"
-    elif r < 3600: cls = "user-god"
-    elif r < 3800: cls = "user-mythic"
+    elif r < 3000: cls = "user-legendary"
+    elif r < 3200: cls = "user-protagonist"
+    elif r < 3500: cls = "user-otaku"
+    elif r < 3800: cls = "user-hime"
     elif r < 4000: cls = "user-yaoi"
     else: cls = "user-yuri"
 
@@ -78,7 +76,11 @@ def format_handle(username, rating=None):
         rest = username[1:]
         return Markup(f'<span class="user-yaoi"><span class="legendary-first">{first}</span><span style="color:#800080">{rest}</span></span>')
 
-    # Special logic for Nutella-style (LGM, Overlord)
+    # Hime Case (Pink Glow) 3500 <= r < 3800
+    if r >= 3500 and r < 3800:
+        return Markup(f'<span class="user-hime">{username}</span>')
+
+    # Nutella-style (LGM)
     if (r >= 2500 and r < 3000):
         first = username[0]
         rest = username[1:]
@@ -92,9 +94,8 @@ def handle_icon(rating):
     except: return ""
     if r >= 4000: return Markup('<span class="perk-icon crown-gold" title="Yuri Overlord">👑</span>')
     if r >= 3800: return Markup('<span class="perk-icon" title="Yaoi Master">🎖️</span>')
-    if r >= 3600: return Markup('<span class="perk-icon" title="Mythic Entity">💎</span>')
-    if r >= 3400: return Markup('<span class="perk-icon crown-gold" title="Godhood">⚜️</span>')
-    if r >= 3000: return Markup('<span class="perk-icon star-silver" title="Ascended">✨</span>')
+    if r >= 3500: return Markup('<span class="perk-icon" title="Hime Status">🌸</span>')
+    if r >= 3000: return Markup('<span class="perk-icon" title="Protagonist">🗡️</span>')
     return ""
 
 @app.template_filter('rank_name')
@@ -114,12 +115,11 @@ def get_rank_name(rating, gender='Male'):
     elif r < 2300: return "Master"
     elif r < 2400: return "International Master"
     elif r < 2500: return "Grandmaster"
-    elif r < 2750: return "Legendary Grandmaster"
-    elif r < 3000: return "Overlord"
-    elif r < 3200: return "Prophet"
-    elif r < 3400: return "Celestial"
-    elif r < 3600: return "God"
-    elif r < 3800: return "Mythic"
+    elif r < 3000: return "Legendary Grandmaster"
+    elif r < 3200: return "Protagonist"
+    elif r < 3500: return "Otaku"
+    elif r < 3800:
+        return "Himejoshi" if gender == "Female" else "Himedanshi"
     elif r < 4000:
         return "Fujoshi" if gender == "Female" else "Fudanshi"
     return "Yurijoshi" if gender == "Female" else "Yuridanshi"
