@@ -1,0 +1,508 @@
+{
+    "verdict": "AC",
+    "score": 100,
+    "max_points": 100,
+    "tests": [
+        {
+            "case": "001",
+            "status": "AC",
+            "time": "9 ms"
+        },
+        {
+            "case": "002",
+            "status": "AC",
+            "time": "8 ms"
+        },
+        {
+            "case": "003",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "004",
+            "status": "AC",
+            "time": "4 ms"
+        },
+        {
+            "case": "005",
+            "status": "AC",
+            "time": "26 ms"
+        },
+        {
+            "case": "006",
+            "status": "AC",
+            "time": "17 ms"
+        },
+        {
+            "case": "007",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "008",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "009",
+            "status": "AC",
+            "time": "4 ms"
+        },
+        {
+            "case": "010",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "011",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "012",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "013",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "014",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "015",
+            "status": "AC",
+            "time": "7 ms"
+        },
+        {
+            "case": "016",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "017",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "018",
+            "status": "AC",
+            "time": "7 ms"
+        },
+        {
+            "case": "019",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "020",
+            "status": "AC",
+            "time": "7 ms"
+        },
+        {
+            "case": "021",
+            "status": "AC",
+            "time": "4 ms"
+        },
+        {
+            "case": "022",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "023",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "024",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "025",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "026",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "027",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "028",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "029",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "030",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "031",
+            "status": "AC",
+            "time": "4 ms"
+        },
+        {
+            "case": "032",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "033",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "034",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "035",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "036",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "037",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "038",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "039",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "040",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "041",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "042",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "043",
+            "status": "AC",
+            "time": "3 ms"
+        },
+        {
+            "case": "044",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "045",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "046",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "047",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "048",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "049",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "050",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "051",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "052",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "053",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "054",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "055",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "056",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "057",
+            "status": "AC",
+            "time": "4 ms"
+        },
+        {
+            "case": "058",
+            "status": "AC",
+            "time": "8 ms"
+        },
+        {
+            "case": "059",
+            "status": "AC",
+            "time": "7 ms"
+        },
+        {
+            "case": "060",
+            "status": "AC",
+            "time": "8 ms"
+        },
+        {
+            "case": "061",
+            "status": "AC",
+            "time": "7 ms"
+        },
+        {
+            "case": "062",
+            "status": "AC",
+            "time": "8 ms"
+        },
+        {
+            "case": "063",
+            "status": "AC",
+            "time": "9 ms"
+        },
+        {
+            "case": "064",
+            "status": "AC",
+            "time": "7 ms"
+        },
+        {
+            "case": "065",
+            "status": "AC",
+            "time": "8 ms"
+        },
+        {
+            "case": "066",
+            "status": "AC",
+            "time": "7 ms"
+        },
+        {
+            "case": "067",
+            "status": "AC",
+            "time": "7 ms"
+        },
+        {
+            "case": "068",
+            "status": "AC",
+            "time": "7 ms"
+        },
+        {
+            "case": "069",
+            "status": "AC",
+            "time": "10 ms"
+        },
+        {
+            "case": "070",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "071",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "072",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "073",
+            "status": "AC",
+            "time": "12 ms"
+        },
+        {
+            "case": "074",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "075",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "076",
+            "status": "AC",
+            "time": "4 ms"
+        },
+        {
+            "case": "077",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "078",
+            "status": "AC",
+            "time": "3 ms"
+        },
+        {
+            "case": "079",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "080",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "081",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "082",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "083",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "084",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "085",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "086",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "087",
+            "status": "AC",
+            "time": "33 ms"
+        },
+        {
+            "case": "088",
+            "status": "AC",
+            "time": "9 ms"
+        },
+        {
+            "case": "089",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "090",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "091",
+            "status": "AC",
+            "time": "10 ms"
+        },
+        {
+            "case": "092",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "093",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "094",
+            "status": "AC",
+            "time": "4 ms"
+        },
+        {
+            "case": "095",
+            "status": "AC",
+            "time": "7 ms"
+        },
+        {
+            "case": "096",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "097",
+            "status": "AC",
+            "time": "6 ms"
+        },
+        {
+            "case": "098",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "099",
+            "status": "AC",
+            "time": "5 ms"
+        },
+        {
+            "case": "100",
+            "status": "AC",
+            "time": "6 ms"
+        }
+    ],
+    "status": "Finished"
+}

@@ -1,8 +1,9 @@
 {
     "Riverxia": {
         "password": "123",
-        "rating": 0,
+        "rating": 5332,
         "is_admin": true,
-        "gender": "Male"
+        "gender": "Male",
+        "contests_participated": 6
     }
 }
