@@ -69,6 +69,18 @@ body {
 
 /* Thematic Rating Styles (Culture Focused) */
 
+@keyframes yuri-bloom {
+    0% { text-shadow: 0 0 2px #ff69b4; }
+    33% { text-shadow: 0 0 12px #ff69b4, 0 0 20px #ff1493; }
+    66% { text-shadow: 0 0 12px #ff1493, 0 0 20px #ffffff; }
+    100% { text-shadow: 0 0 2px #ff69b4; }
+}
+
+@keyframes yuri-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
 @keyframes subtle-pulse-purple {
     0% { text-shadow: 0 0 2px #800080; }
     50% { text-shadow: 0 0 8px #800080; }
@@ -98,7 +110,11 @@ body {
 .user-otaku { color: #008b8b !important; font-weight: bold; text-shadow: 1px 1px 0px #eee; }
 .user-hime { color: #db7093 !important; font-weight: bold; animation: subtle-pulse-pink 2s infinite; }
 .user-yaoi { font-weight: bold; animation: subtle-pulse-purple 1.5s infinite; }
-.user-yuri { font-weight: bold; } /* Animation handled via individual chars */
+.user-yuri { 
+    font-weight: bold; 
+    display: inline-block;
+    animation: yuri-bloom 1.5s infinite, yuri-float 2s ease-in-out infinite;
+} 
 
 .legendary-first { color: #000000 !important; }
 
