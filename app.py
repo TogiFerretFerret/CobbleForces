@@ -258,6 +258,10 @@ def rankings():
     users_data.sort(key=lambda x: x['rating'], reverse=True)
     return render_template('rankings.html', rankings=users_data)
 
+@app.route('/rating-system')
+def rating_system():
+    return render_template('rating_system.html')
+
 @app.route('/login', methods=['POST'])
 def login():
     username = request.form.get('username')

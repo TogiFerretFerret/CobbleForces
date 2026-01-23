@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Rating System - CobbleForces{% endblock %}
+
+{% block content %}
+<div class="col-12">
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h2 class="text-primary mb-4">Rating System</h2>
+            <p>
+                CobbleForces uses a custom ELO-based rating system to rank participants based on their performance in contests. 
+                Your rating determines your title and the color of your handle across the platform.
+            </p>
+
+            <h4 class="mt-5 mb-3">Rating Tiers</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered table-cf align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Rating Range</th>
+                            <th>Title (Male/Other)</th>
+                            <th>Title (Female)</th>
+                            <th>Color / Style</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>3600+</td>
+                            <td><span class="user-yuri">Yuridanshi</span></td>
+                            <td><span class="user-yuri">Yurijoshi</span></td>
+                            <td><span class="user-yuri">Bocchi Themed (Pink/Red/Orange/Blue...)</span></td>
+                        </tr>
+                        <tr>
+                            <td>3000 — 3599</td>
+                            <td><strong><span class="legendary-first">F</span><span style="color:#800080">udanshi</span></strong></td>
+                            <td><strong><span class="legendary-first">F</span><span style="color:#800080">ujoshi</span></strong></td>
+                            <td><strong><span class="legendary-first">B</span><span style="color:#800080">lack first letter, Purple rest</span></strong></td>
+                        </tr>
+                        <tr>
+                            <td>2500 — 2999</td>
+                            <td colspan="2" class="text-center"><strong><span class="legendary-first">L</span><span class="user-legendary">egendary Grandmaster</span></strong></td>
+                            <td><strong><span class="legendary-first">B</span><span class="user-legendary">lack first letter, Red rest</span></strong></td>
+                        </tr>
+                        <tr>
+                            <td>2400 — 2499</td>
+                            <td colspan="2" class="text-center"><span class="user-grandmaster">Grandmaster</span></td>
+                            <td><span class="user-grandmaster">Red</span></td>
+                        </tr>
+                        <tr>
+                            <td>2300 — 2399</td>
+                            <td colspan="2" class="text-center"><span class="user-master">International Master</span></td>
+                            <td><span class="user-master">Orange</span></td>
+                        </tr>
+                        <tr>
+                            <td>2100 — 2299</td>
+                            <td colspan="2" class="text-center"><span class="user-master">Master</span></td>
+                            <td><span class="user-master">Orange</span></td>
+                        </tr>
+                        <tr>
+                            <td>1900 — 2099</td>
+                            <td colspan="2" class="text-center"><span class="user-candidate-master">Candidate Master</span></td>
+                            <td><span class="user-candidate-master">Violet</span></td>
+                        </tr>
+                        <tr>
+                            <td>1600 — 1899</td>
+                            <td colspan="2" class="text-center"><span class="user-expert">Expert</span></td>
+                            <td><span class="user-expert">Blue</span></td>
+                        </tr>
+                        <tr>
+                            <td>1400 — 1599</td>
+                            <td colspan="2" class="text-center"><span class="user-specialist">Specialist</span></td>
+                            <td><span class="user-specialist">Cyan</span></td>
+                        </tr>
+                        <tr>
+                            <td>1200 — 1399</td>
+                            <td colspan="2" class="text-center"><span class="user-pupil">Pupil</span></td>
+                            <td><span class="user-pupil">Green</span></td>
+                        </tr>
+                        <tr>
+                            <td>0 — 1199</td>
+                            <td colspan="2" class="text-center"><span class="user-newbie">Newbie</span></td>
+                            <td><span class="user-newbie">Gray</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 class="mt-5 mb-3">How it works</h4>
+            <p>
+                After each contest, the system calculates the "Expected Performance" of every participant against every other participant based on their current ratings.
+            </p>
+            <ul>
+                <li>If you perform better than expected (rank higher than people with much higher ratings), your rating increases.</li>
+                <li>If you perform worse than expected, your rating decreases.</li>
+                <li>The magnitude of the change is influenced by the number of participants and the rating difference between you and your opponents.</li>
+            </ul>
+            <p class="text-muted small italic">
+                Note: Ratings are only updated when an Administrator triggers the "Recalculate ELO Ratings" action for a specific contest.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
