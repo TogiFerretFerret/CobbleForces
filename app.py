@@ -43,8 +43,10 @@ def format_handle(username, rating=None):
     except:
         r = 0
         
-    cls = "user-newbie"
-    if r < 1200: cls = "user-newbie"
+    cls = "user-lurker"
+    if r < 400: cls = "user-lurker"
+    elif r < 800: cls = "user-newbie"
+    elif r < 1200: cls = "user-beginner"
     elif r < 1400: cls = "user-pupil"
     elif r < 1600: cls = "user-specialist"
     elif r < 1900: cls = "user-expert"
@@ -52,7 +54,8 @@ def format_handle(username, rating=None):
     elif r < 2300: cls = "user-master"
     elif r < 2400: cls = "user-international-master"
     elif r < 2500: cls = "user-grandmaster"
-    elif r < 3000: cls = "user-legendary"
+    elif r < 2750: cls = "user-legendary"
+    elif r < 3000: cls = "user-overlord"
     elif r < 3600: cls = "user-yaoi"
     else: cls = "user-yuri"
 
@@ -72,8 +75,14 @@ def format_handle(username, rating=None):
         # Deep Purple #800080
         return Markup(f'<span style="font-weight:bold"><span class="legendary-first">{first}</span><span style="color:#800080">{rest}</span></span>')
 
-    # Nutella case (Legendary GM) 2500 <= r < 3000
-    if r >= 2500 and r < 3000:
+    # Overlord Case (Black + Gold) 2750 <= r < 3000
+    if r >= 2750 and r < 3000:
+        first = username[0]
+        rest = username[1:]
+        return Markup(f'<span style="font-weight:bold"><span class="legendary-first">{first}</span><span style="color:#d4af37">{rest}</span></span>')
+
+    # Nutella case (Legendary GM) 2500 <= r < 2750
+    if r >= 2500 and r < 2750:
         first = username[0]
         rest = username[1:]
         return Markup(f'<span class="{cls}"><span class="legendary-first">{first}</span>{rest}</span>')
@@ -88,7 +97,9 @@ def get_rank_name(rating, gender='Male'):
     # Defaults
     if gender not in ['Male', 'Female']: gender = 'Male' # Treat others as Male for titles for now unless specified
     
-    if r < 1200: return "Newbie"
+    if r < 400: return "Lurker"
+    elif r < 800: return "Newbie"
+    elif r < 1200: return "Beginner"
     elif r < 1400: return "Pupil"
     elif r < 1600: return "Specialist"
     elif r < 1900: return "Expert"
@@ -96,7 +107,8 @@ def get_rank_name(rating, gender='Male'):
     elif r < 2300: return "Master"
     elif r < 2400: return "International Master"
     elif r < 2500: return "Grandmaster"
-    elif r < 3000: return "Legendary Grandmaster"
+    elif r < 2750: return "Legendary Grandmaster"
+    elif r < 3000: return "Overlord"
     elif r < 3600:
         return "Fujoshi" if gender == "Female" else "Fudanshi"
     return "Yurijoshi" if gender == "Female" else "Yuridanshi"

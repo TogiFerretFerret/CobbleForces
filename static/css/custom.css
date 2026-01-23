@@ -67,17 +67,23 @@ body {
 .verdict-RE { color: #0000ff; font-weight: bold; }
 .verdict-CE { color: #888; font-weight: bold; }
 
-/* Rating Colors */
-.user-newbie { color: #808080 !important; font-weight: bold; }
-.user-pupil { color: #008000 !important; font-weight: bold; }
-.user-specialist { color: #03a89e !important; font-weight: bold; }
-.user-expert { color: #0000ff !important; font-weight: bold; }
-.user-candidate-master { color: #aa00aa !important; font-weight: bold; }
-.user-master { color: #ff8c00 !important; font-weight: bold; }
-.user-grandmaster { color: #ff0000 !important; font-weight: bold; }
-.user-legendary { color: #ff0000 !important; font-weight: bold; }
-.legendary-first { color: #000000 !important; }
+/* Rating Colors (Codeforces Style) */
+.user-lurker { color: #555555 !important; font-weight: bold; }      /* 0-399 */
+.user-newbie { color: #808080 !important; font-weight: bold; }      /* 400-799 */
+.user-beginner { color: #aaaaaa !important; font-weight: bold; }    /* 800-1199 */
+.user-pupil { color: #008000 !important; font-weight: bold; }       /* 1200-1399 */
+.user-specialist { color: #03a89e !important; font-weight: bold; }  /* 1400-1599 */
+.user-expert { color: #0000ff !important; font-weight: bold; }      /* 1600-1899 */
+.user-candidate-master { color: #aa00aa !important; font-weight: bold; } /* 1900-2099 */
+.user-master { color: #ff8c00 !important; font-weight: bold; }      /* 2100-2299 */
+.user-international-master { color: #ff8c00 !important; font-weight: bold; } /* 2300-2399 */
+.user-grandmaster { color: #ff0000 !important; font-weight: bold; } /* 2400-2499 */
+.user-legendary { color: #ff0000 !important; font-weight: bold; }   /* 2500-2749 */
+.user-overlord { color: #d4af37 !important; font-weight: bold; }    /* 2750-2999 (Gold) */
+.user-yaoi { font-weight: bold; }
 .user-yuri { font-weight: bold; }
+
+.legendary-first { color: #000000 !important; }
 
 /* Footer */
 .footer {
