@@ -16,8 +16,11 @@
                     <thead class="table-light">
                         <tr>
                             <th class="rank-cell">#</th>
-                            <th class="user-cell">Who</th>
-                            <th>=</th>
+                            <th class="user-cell">User</th>
+                            <th>Rating</th>
+                            <th>&Delta;</th>
+                            <th>Solved</th>
+                            <th>Penalty</th>
                             {% for p in problems %}
                             <th style="width: 60px;">{{ p.id }}</th>
                             {% endfor %}
@@ -25,18 +28,39 @@
                     </thead>
                     <tbody>
                         {% for entry in leaderboard %}
-                        <tr {% if entry.username == current_user %}class="table-info"{% endif %}>
-                            <td class="text-center">{{ loop.index }}</td>
+                        <tr {% if entry.username == current_user %}class="table-warning"{% endif %}>
+                            <td class="text-center">{{ entry.actual_rank }}</td>
                             <td class="user-cell">
                                 {{ entry.username | handle(entry.rating) }}{{ entry.rating | handle_icon }}
+                                {% if entry.is_speedster %}
+                                    <span class="text-warning ms-1" title="Speedster: Average penalty < 20 mins">⚡</span>
+                                {% endif %}
                             </td>
-                            <td class="text-center fw-bold text-primary">{{ entry.total_score }}</td>
+                            <td class="text-center text-muted" style="font-size: 0.9em;">
+                                {{ entry.rating }}
+                            </td>
+                            <td class="text-center">
+                                {% if entry.delta > 0 %}
+                                    <span class="text-success" style="font-weight: bold;">+{{ entry.delta }}</span>
+                                {% elif entry.delta < 0 %}
+                                    <span class="text-danger" style="font-weight: bold;">{{ entry.delta }}</span>
+                                {% else %}
+                                    <span class="text-muted">0</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center fw-bold">{{ entry.total_solved }}</td>
+                            <td class="text-center text-muted">{{ entry.total_penalty }}</td>
                             
                             {% for p in problems %}
-                                {% set score = entry.breakdown.get(p.id, 0) %}
+                                {% set prob_data = entry.breakdown.get(p.id) %}
                                 <td class="text-center">
-                                    {% if score > 0 %}
-                                        <span class="text-success fw-bold">+{{ score | int }}</span>
+                                    {% if prob_data and prob_data.solved %}
+                                        <div class="text-success fw-bold" style="line-height: 1.1;">
+                                            +{% if prob_data.penalty > 0 %}{{ prob_data.penalty }}{% endif %}
+                                        </div>
+                                        <div class="text-muted small" style="font-size: 0.7em;">
+                                            {{ prob_data.time }}
+                                        </div>
                                     {% else %}
                                         <span class="text-muted">-</span>
                                     {% endif %}

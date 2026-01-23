@@ -94,7 +94,7 @@ def handle_icon(rating):
     except: return ""
     if r >= 4000: return Markup('<span class="perk-icon crown-gold" title="Yuri Overlord">👑</span>')
     if r >= 3800: return Markup('<span class="perk-icon" title="Yaoi Master">🎖️</span>')
-    if r >= 3500: return Markup('<span class="perk-icon" title="Hime Status">🌸</span>')
+    if r >= 3500: return Markup('<span class="perk-icon" title="Sakura Trick">🌸</span>')
     if r >= 3000: return Markup('<span class="perk-icon" title="Protagonist">🗡️</span>')
     return ""
 
@@ -145,6 +145,8 @@ def admin_required(f):
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    if 'username' in session:
+        return redirect(url_for('index'))
     if request.method == 'GET':
         return render_template('register.html')
     
@@ -263,7 +265,7 @@ def submit():
     problem = problem_manager.get_problem(contest_id, problem_id)
     if not problem: return "Invalid problem", 400
     
-    result = validator.judge_submission(filepath, contest_id, problem_id, max_points=problem.points)
+    result = validator.judge_submission(filepath, contest_id, problem_id, max_points=100)
     
     contest_manager.save_submission(session['username'], contest_id, problem_id, result['verdict'], result['score'])
     
@@ -276,7 +278,8 @@ def rankings():
         users_data.append({
             'username': u, 
             'rating': data.get('rating', 0),
-            'gender': data.get('gender', 'Male')
+            'gender': data.get('gender', 'Male'),
+            'participation': user_manager.get_participation_count(u)
         })
     users_data.sort(key=lambda x: x['rating'], reverse=True)
     return render_template('rankings.html', rankings=users_data)
@@ -284,6 +287,10 @@ def rankings():
 @app.route('/rating-system')
 def rating_system():
     return render_template('rating_system.html')
+
+@app.route('/nqe')
+def nqe_system():
+    return render_template('nqe_system.html')
 
 @app.route('/login', methods=['POST'])
 def login():

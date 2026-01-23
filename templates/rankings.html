@@ -13,22 +13,26 @@
                     <thead class="table-light">
                         <tr>
                             <th class="rank-cell">#</th>
-                            <th class="user-cell">Who</th>
+                            <th class="user-cell">User</th>
+                            <th># Contests</th>
                             <th>Rating</th>
-                            <th>Title</th>
+                            <th>Rank</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for user in rankings %}
-                        <tr {% if user.username == current_user %}class="table-info"{% endif %}>
+                        <tr {% if user.username == current_user %}class="table-warning"{% endif %}>
                             <td class="text-center">{{ loop.index }}</td>
-                        <td>
-                            <span style="font-size: 1.1rem;">{{ user.username | handle(user.rating) }}{{ user.rating | handle_icon }}</span>
-                        </td>
+                            <td>
+                                <span style="font-size: 1.1rem;">{{ user.username | handle(user.rating) }}{{ user.rating | handle_icon }}</span>
+                            </td>
+                            <td class="text-center">
+                                {{ user.participation }}
+                            </td>
                             <td class="text-center fw-bold">
                                 {{ user.rating }}
                             </td>
-                            <td class="text-center text-muted">
+                            <td class="text-center text-muted" style="font-size: 0.9em;">
                                 {{ user.rating | rank_name(user.gender) }}
                             </td>
                         </tr>

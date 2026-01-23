@@ -1,11 +1,23 @@
 import os
+import json
 
 class Problem:
     def __init__(self, problem_id, problem_dir, contest_id):
         self.id = problem_id
         self.contest_id = contest_id
         self.problem_dir = problem_dir
-        self.points = 100 # Default points, could be loaded from a meta file
+        self.rating = 800 # Default
+        
+        # Load from metadata if exists
+        info_path = os.path.join(problem_dir, 'problem_info.json')
+        if os.path.exists(info_path):
+            try:
+                with open(info_path, 'r') as f:
+                    info = json.load(f)
+                    self.rating = info.get('rating', 800)
+            except:
+                pass
+
         self.has_pdf = os.path.exists(os.path.join(problem_dir, 'statement.pdf'))
         self.has_editorial = os.path.exists(os.path.join(problem_dir, 'editorial.pdf'))
 

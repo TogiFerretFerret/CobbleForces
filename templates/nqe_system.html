@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}NQE Algorithm - CobbleForces{% endblock %}
+
+{% block content %}
+<div class="col-12">
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h2 class="text-primary mb-4">The NQE (Not Quite Elo) System</h2>
+            <p class="lead">
+                CobbleForces uses a custom rating algorithm designed to be <strong>asymmetric</strong> and <strong>inflationary</strong>. 
+            </p>
+            <p>
+                Standard Elo is zero-sum (points are only transferred). NQE is positive-sum, meaning high performance is rewarded more than low performance is punished. This ensures that legendary tiers like <strong>Yuridanshi (4000+)</strong> are achievable over time.
+            </p>
+
+            <hr class="my-5">
+
+            <h4 class="mb-3">Phase 1: Calculating the Seed</h4>
+            <p>Before any changes are applied, we calculate your <strong>Expected Rank (Seed)</strong>. This is based on the probability of you beating every other opponent in the contest.</p>
+            <div class="bg-light p-3 rounded mb-4">
+                <code>Probability(A beats B) = 1 / (1 + 10^((RatingB - RatingA) / 400))</code><br>
+                <code>Seed = 1 + Σ Probability(Opponents beat You)</code>
+            </div>
+
+            <h4 class="mt-5 mb-3">Phase 2: Performance Rating</h4>
+            <p>After the contest, we determine your <strong>Performance Rating</strong>. This is the rating you <em>effectively</em> performed at during this specific contest.</p>
+            <p>Using a bisection binary search, we find a rating value that would have made your <strong>Seed</strong> equal to your <strong>Actual Rank</strong>.</p>
+
+            <h4 class="mt-5 mb-3">Phase 3: The Drift Update</h4>
+            <p>Your rating doesn't jump immediately to your performance rating. Instead, it "drifts" toward it using a dynamic <strong>Stability Factor (K)</strong>.</p>
+            <div class="bg-light p-3 rounded mb-4">
+                <code>RatingChange = K * (PerformanceRating - CurrentRating) + Bonuses</code>
+            </div>
+            
+            <h5>Dynamic K-Factors:</h5>
+            <ul>
+                <li><strong>Placement Phase (0-10 contests):</strong> <code>K = 0.5</code> (Rapid climbing).</li>
+                <li><strong>Established Phase (11+ contests):</strong> <code>K = 0.2</code> (Stability).</li>
+                <li><strong>Choke Protection:</strong> If you perform worse than your current rating, <code>K</code> is halved (losses hurt less than wins help).</li>
+            </ul>
+
+            <h4 class="mt-5 mb-3">Phase 4: Gamification & Bonuses</h4>
+            <p>To support the "Cobble" flavor and keep the climb engaging, flat bonuses are applied:</p>
+            <ul>
+                <li><strong>Protagonist Bonus:</strong> Users below 1200 rating get a flat <strong>+5</strong> if they solve at least one problem.</li>
+                <li><strong>Speedster Bonus:</strong> If your average penalty per solved problem is <strong>under 20 minutes</strong>, you get a flat <strong>+2</strong> and a ⚡ icon in the standings.</li>
+                <li><strong>Activity Streak:</strong> Participating in 3 consecutive contests grants a <strong>1.1x multiplier</strong> to your rating change.</li>
+            </ul>
+
+            <h4 class="mt-5 mb-3">Phase 5: Rating Compression (The Soft Cap)</h4>
+            <p>To prevent infinite inflation and maintain the prestige of the <strong>Crown Perk</strong>, ratings above 4000 are compressed:</p>
+            <div class="bg-light p-3 rounded">
+                <code>NewRating = 4000 + (RawNewRating - 4000) / 2</code>
+            </div>
+            <p class="mt-2 text-muted small">This makes 4000+ an "Exponential Hill"—the higher you go, the more effort is required to stay there.</p>
+
+            <div class="mt-5">
+                <a href="/rating-system" class="btn btn-outline-primary">Back to Rating Tiers</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

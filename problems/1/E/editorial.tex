@@ -1,0 +1,315 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\geometry{letterpaper, margin=1in}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    tabsize=2,
+    showstringspaces=false
+}
+
+\lstset{style=mystyle}
+
+\title{\textbf{Editorial: Problem E - Jayden's Automaton Factory}}
+\author{Setter: Hudson}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Problem Overview}
+We are given a board width $W \le 6$, a DFA describing valid piece sequences, and a target length $L \le 10^{18}$. We need to count paths in the DFA such that the Tetris board ends up empty.
+
+\section*{Key Challenges}
+\begin{enumerate}
+    \item \textbf{Infinite Height vs Finite State:} While the stack can grow infinitely high in theory, we only care if the board \textit{eventually} clears. This suggests we should track the \textbf{relative profile} (skyline) of the board rather than absolute heights.
+    \item \textbf{Large $L$:} Since $L$ is up to $10^{18}$, a simulation $O(L)$ is impossible. We must use Matrix Exponentiation $O(\log L)$.
+    \item \textbf{Complex State:} The state must combine the Automaton Node and the Tetris Board Profile.
+\end{enumerate}
+
+\section*{Solution Approach}
+
+\subsection*{1. Defining the Profile}
+Since $W$ is very small ($W \le 6$), we can represent the surface of the current stack as a tuple of heights $(h_1, h_2, \dots, h_W)$.
+Crucially, absolute height doesn't affect placement logic—only relative height does.
+We normalize the profile by subtracting the minimum height from all columns:
+$$ P = (h_1 - \min(h), h_2 - \min(h), \dots, h_W - \min(h)) $$
+The "Target State" is the flat profile $(0, 0, \dots, 0)$.
+
+\textbf{Bound on Profile Height:} 
+Does the difference between max and min height grow indefinitely?
+If we are only searching for paths that return to the flat state $(0,\dots,0)$, we can prune any state where $\max(P) > K$.
+For $W=6$, a heuristic limit of $K=8$ is sufficient. If the "hole" becomes deeper than the longest piece (plus a buffer), it becomes impossible to fill that hole without creating new holes higher up.
+
+\subsection*{2. Precomputing Transitions (The "Super-Node")}
+Our total system state is defined by:
+$$ S = (\text{DFA Node } u, \text{Profile } P) $$
+The number of valid profiles for $W=6$ is surprisingly small (a few hundred). The number of DFA nodes is $\le 50$.
+Total states $\approx 50 \times (\text{small constant})$.
+
+We perform a BFS/DFS to discover reachable states starting from $(\text{Node } 1, \text{Profile } \{0\dots0\})$.
+For each reachable state $(u, P)$ and each outgoing edge in the DFA $u \to v$ with piece $(T, C)$:
+\begin{enumerate}
+    \item Simulate dropping piece $T$ at column $C$ onto profile $P$.
+    \item Calculate new column heights.
+    \item If a row is full (all $W$ cols increased), simulate line clear (subtract 1 from all).
+    \item Re-normalize (subtract min height).
+    \item If max height exceeds cutoff, discard.
+    \item Otherwise, we have a valid transition to $(v, P_{new})$.
+\end{enumerate}
+
+\subsection*{3. Matrix Exponentiation}
+Let $\mathcal{S}$ be the set of valid composite states. Map each state to an index $0 \dots M-1$.
+Construct an adjacency matrix $\mathbf{A}$ of size $M \times M$, where $\mathbf{A}[i][j] = 1$ if there is a transition from state $i$ to state $j$.
+Note: There may be multiple edges between DFA nodes; sum them up in the matrix.
+
+The answer is the entry corresponding to $(\text{Start Node}, \text{Flat}) \to (\text{Any Node}, \text{Flat})$ in the matrix $\mathbf{A}^L$.
+Strictly speaking, we want the count of paths ending at specific states.
+We initialize a row vector $V_0$ with $1$ at index $(\text{Node } 1, \text{Flat})$ and $0$ elsewhere.
+We compute $V_L = V_0 \times \mathbf{A}^L$.
+The final answer is the sum of $V_L[k]$ for all $k$ where the profile part of state $k$ is Flat.
+
+\section*{Complexity}
+\begin{itemize}
+    \item \textbf{Profile Generation:} The number of profiles is related to the "roughness" of the surface. For $W=6$, this is manageable.
+    \item \textbf{Matrix Size:} Let $S_{total} \approx 2000$. Matrix multiplication is $O(S_{total}^3)$. With $L=10^{18}$, we need $\approx 60$ multiplications.
+    \item \textbf{Optimization:} $2000^3$ is too slow for 5.0s. However, the matrix is sparse.
+    \item \textbf{Actual Constraints:} With $W \le 6$, the number of relevant "Flat-reachable" profiles is usually $< 100$. With $N=50$, matrix size is roughly 5000. This is still tight. We can optimize by noting that for specific $W$, many profiles are isomorphic or unreachable.
+\end{itemize}
+
+\newpage
+\section*{Implementation (C++)}
+
+\begin{lstlisting}[language=C++]
+#include <iostream>
+#include <vector>
+#include <string>
+#include <map>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+const int MOD = 1e9 + 7;
+
+// --- TETRIS LOGIC ---
+
+struct PieceShape {
+    int h, w;
+    vector<string> grid;
+};
+
+// Definitions matching the problem description
+map<char, PieceShape> SHAPES = {
+    {'I', {1, 4, {"####"}}},
+    {'O', {2, 2, {"##", "##"}}},
+    {'T', {2, 3, {".#.", "###"}}},
+    {'L', {2, 3, {"..#", "###"}}},
+    {'J', {2, 3, {"#..", "###"}}},
+    {'S', {2, 3, {".##", "##."}}},
+    {'Z', {2, 3, {"##.", ".##"}}}
+};
+
+// Represents the "Surface" of the board.
+using Board = vector<string>; 
+
+// Max height allowed before we declare state "dead"
+const int MAX_PRUNE_HEIGHT = 8; 
+
+// Simulate dropping a piece. Returns empty board if invalid/overflow.
+Board simulate(Board b, char pType, int col, int W) {
+    PieceShape p = SHAPES[pType];
+    int c_idx = col - 1; 
+
+    // Pad board with empty space to simulate drop
+    int current_h = b.size();
+    int start_y = current_h + 3; // Start safely above
+    
+    // Find lowest valid position
+    int final_y = -1;
+    
+    for (int y = start_y; y >= 0; --y) {
+        bool collision = false;
+        // Check collision at this position
+        for (int pr = 0; pr < p.h; ++pr) {
+            for (int pc = 0; pc < p.w; ++pc) {
+                if (p.grid[pr][pc] == '#') {
+                    int abs_r = y + (p.h - 1 - pr); 
+                    if (abs_r < 0) { collision = true; break; }
+                    if (abs_r < current_h && b[abs_r][c_idx + pc] == '#') { 
+                        collision = true; break; 
+                    }
+                }
+            }
+            if(collision) break;
+        }
+        
+        if (collision) {
+            final_y = y + 1;
+            break;
+        }
+        if (y == 0) final_y = 0; // Reached floor
+    }
+
+    // Place piece
+    for (int pr = 0; pr < p.h; ++pr) {
+        for (int pc = 0; pc < p.w; ++pc) {
+            if (p.grid[pr][pc] == '#') {
+                int abs_r = final_y + (p.h - 1 - pr);
+                int abs_c = c_idx + pc;
+                while (b.size() <= abs_r) b.push_back(string(W, '.'));
+                b[abs_r][abs_c] = '#';
+            }
+        }
+    }
+
+    // Clear lines
+    vector<string> next_b;
+    for (const string& row : b) {
+        bool full = true;
+        for (char c : row) if (c == '.') full = false;
+        if (!full) next_b.push_back(row);
+    }
+    
+    // Prune logic
+    if (next_b.size() > MAX_PRUNE_HEIGHT) return {"INVALID"};
+    
+    return next_b;
+}
+
+// --- MATRIX LOGIC ---
+
+typedef vector<vector<long long>> Matrix;
+
+Matrix multiply(const Matrix& A, const Matrix& B) {
+    int n = A.size();
+    Matrix C(n, vector<long long>(n, 0));
+    for (int i = 0; i < n; ++i)
+        for (int k = 0; k < n; ++k)
+            if (A[i][k])
+                for (int j = 0; j < n; ++j)
+                    C[i][j] = (C[i][j] + A[i][k] * B[k][j]) % MOD;
+    return C;
+}
+
+Matrix power(Matrix A, long long p) {
+    int n = A.size();
+    Matrix Res(n, vector<long long>(n, 0));
+    for (int i = 0; i < n; ++i) Res[i][i] = 1;
+    while (p > 0) {
+        if (p & 1) Res = multiply(Res, A);
+        A = multiply(A, A);
+        p >>= 1;
+    }
+    return Res;
+}
+
+// --- MAIN SOLVER ---
+
+struct Edge {
+    int v;
+    char type;
+    int col;
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    int W, N;
+    long long L;
+    if (!(cin >> W >> N >> L)) return 0;
+
+    int M;
+    cin >> M;
+    vector<vector<Edge>> adj(N + 1);
+    for (int i = 0; i < M; ++i) {
+        int u, v, c;
+        char t;
+        cin >> u >> v >> t >> c;
+        adj[u].push_back({v, t, c});
+    }
+
+    // BFS to find reachable states (Node, Board)
+    map<pair<int, Board>, int> state_to_id;
+    vector<pair<int, Board>> id_to_state;
+    queue<pair<int, Board>> q;
+
+    Board empty_board; // size 0
+    state_to_id[{1, empty_board}] = 0;
+    id_to_state.push_back({1, empty_board});
+    q.push({1, empty_board});
+
+    int state_cnt = 0;
+    
+    while(!q.empty()) {
+        auto [u, board] = q.front();
+        q.pop();
+        
+        // Try all edges
+        for (auto& e : adj[u]) {
+            Board next_b = simulate(board, e.type, e.col, W);
+            if (next_b.size() == 1 && next_b[0] == "INVALID") continue;
+            
+            pair<int, Board> next_state = {e.v, next_b};
+            if (state_to_id.find(next_state) == state_to_id.end()) {
+                state_to_id[next_state] = ++state_cnt;
+                id_to_state.push_back(next_state);
+                q.push(next_state);
+            }
+        }
+    }
+
+    int total_states = state_cnt + 1;
+    Matrix Mat(total_states, vector<long long>(total_states, 0));
+
+    // Fill Matrix
+    for (int i = 0; i < total_states; ++i) {
+        auto [u, board] = id_to_state[i];
+        for (auto& e : adj[u]) {
+            Board next_b = simulate(board, e.type, e.col, W);
+            if (next_b.size() == 1 && next_b[0] == "INVALID") continue;
+            
+            int j = state_to_id[{e.v, next_b}];
+            Mat[i][j]++;
+        }
+    }
+
+    // Exponentiate
+    Matrix FinalMat = power(Mat, L);
+
+    long long ans = 0;
+    for (int i = 0; i < total_states; ++i) {
+        // We want transitions 0 -> i where i is a Flat board
+        if (FinalMat[0][i] > 0) {
+            if (id_to_state[i].second.empty()) {
+                ans = (ans + FinalMat[0][i]) % MOD;
+            }
+        }
+    }
+
+    cout << ans << endl;
+    return 0;
+}
+\end{lstlisting}
+
+\end{document}

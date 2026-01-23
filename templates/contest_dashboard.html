@@ -25,7 +25,7 @@
                     <tr>
                         <th style="width: 50px;">#</th>
                         <th>Name</th>
-                        <th style="width: 100px;">Points</th>
+                        <th style="width: 100px;">Rating</th>
                         <th style="width: 150px;">Statement</th>
                     </tr>
                 </thead>
@@ -38,7 +38,9 @@
                                 Problem {{ p.id }}
                             </a>
                         </td>
-                        <td class="text-center text-muted">{{ p.points }}</td>
+                        <td class="text-center text-muted">
+                            <span class="badge bg-secondary opacity-75">{{ p.rating }}</span>
+                        </td>
                         <td class="text-center">
                             {% if p.has_pdf %}
                                 <a href="/problem/{{ contest.id }}/{{ p.id }}/pdf" target="_blank" title="View PDF">📄</a>
@@ -98,7 +100,6 @@
                             <th>When</th>
                             <th>Prob</th>
                             <th>Verdict</th>
-                            <th>Score</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -108,7 +109,6 @@
                             <td class="small">{{ sub.time }}</td>
                             <td>{{ sub.problem }}</td>
                             <td class="verdict-{{ sub.verdict }} small">{{ sub.verdict }}</td>
-                            <td class="small">{{ sub.score if sub.score is defined else '-' }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

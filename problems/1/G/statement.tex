@@ -1,0 +1,81 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{verbatim}
+
+\geometry{letterpaper, margin=1in}
+
+\title{\textbf{Problem G: The Discipline Committee's Struggle}}
+\author{Time Limit: 4.0s | Memory Limit: 512MB}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Description}
+
+Hirano is the backbone of the Discipline Committee, constantly stressing over Sasaki's "bad boy" behavior (colored hair, unbuttoned shirts) and Kagiura's general messiness. Miyano, as always, is watching the events unfold, documenting them for... \textit{research purposes}.
+
+We can model the "Delinquency Level" of $N$ students as an array $A$ of size $N$, initially all zeros.
+Over time, $Q$ events occur. These events correspond to Sasaki causing trouble, Hirano enforcing rules, or Miyano reflecting on the history of their interactions.
+
+You must process the following operations:
+
+\begin{enumerate}
+    \item \textbf{Sasaki's Influence (Range Add):} Given $L, R, x$, add $x$ to the delinquency level of all students $i$ in range $[L, R]$. ($A_i = A_i + x$).
+    \item \textbf{Hirano's Enforcement (Range ChMin):} Given $L, R, x$, cap the delinquency level of all students in range $[L, R]$ at $x$. That is, for all $L \le i \le R$, update $A_i = \min(A_i, x)$.
+    \item \textbf{Miyano's Observation (Query Current Sum):} Given $L, R$, compute the current total delinquency: $\sum_{i=L}^{R} A_i$.
+    \item \textbf{The Anthology (Query Historic Sum):} Given $L, R$, compute the sum of the delinquency levels \textbf{over all time}.
+\end{enumerate}
+
+\subsection*{Definition of Historic Sum}
+Let $A^{(t)}$ be the state of array $A$ after the $t$-th operation.
+Let $H_i$ be the cumulative history of index $i$ after $k$ operations, defined as:
+$$ H_i = \sum_{t=0}^{k} A_i^{(t)} $$
+The query asks for $\sum_{i=L}^{R} H_i$ at the current time $k$.
+
+\section*{Input}
+
+The first line contains two integers $N$ and $Q$ ($1 \le N, Q \le 2 \cdot 10^5$).
+The second line contains $N$ integers representing the initial array $A$ ($0 \le A_i \le 10^9$).
+The next $Q$ lines describe the operations:
+\begin{itemize}
+    \item \texttt{1 L R x}: Range Add ($|x| \le 10^9$).
+    \item \texttt{2 L R x}: Range ChMin ($|x| \le 10^9$).
+    \item \texttt{3 L R}: Query Current Sum.
+    \item \texttt{4 L R}: Query Historic Sum.
+\end{itemize}
+
+\section*{Output}
+
+For each type 3 and type 4 query, output the answer on a new line.
+
+\section*{Examples}
+
+\subsection*{Example 1}
+\textbf{Input:}
+\begin{verbatim}
+5 6
+1 2 3 4 5
+1 1 5 2
+3 1 5
+2 1 5 4
+3 1 5
+4 1 5
+4 3 3
+\end{verbatim}
+
+\textbf{Output:}
+\begin{verbatim}
+25
+19
+59
+13
+\end{verbatim}
+
+\end{document}

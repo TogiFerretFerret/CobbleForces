@@ -26,3 +26,16 @@ class UserManager:
 
     def is_admin(self, username):
         return self.users.get(username, {}).get('is_admin', False)
+
+    def get_participation_count(self, username):
+        return self.users.get(username, {}).get('contests_participated', 0)
+
+    def save_users(self):
+        with open(self.users_file, 'w') as f:
+            json.dump(self.users, f, indent=4)
+
+    def increment_participation(self, username):
+        if username in self.users:
+            count = self.users[username].get('contests_participated', 0)
+            self.users[username]['contests_participated'] = count + 1
+            self.save_users()

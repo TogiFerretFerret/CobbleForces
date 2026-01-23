@@ -1,0 +1,63 @@
+# CobbleForces Rating System & Visual Identity
+
+This document describes the tiered rating system for the CobbleForces platform. Use this context to understand how user handles should be styled, colored, and represented in any generated code or documentation.
+
+## Tier Hierarchy & Styling
+
+### Enlightened Tiers (3000+)
+These ranks feature advanced CSS animations and unique "Perks" (icons attached to handles).
+
+| Rating | Title (M/F) | Base Color | Styling Effects | Perk Icon |
+| :--- | :--- | :--- | :--- | :--- |
+| **4000+** | Yuridanshi / Yurijoshi | Multi-color | "Bocchi" character-by-character coloring, Animated Bloom & Float | 👑 (Crown) |
+| **3800-3999** | Fudanshi / Fujoshi | Purple / Black | Black first letter, Pulsing Purple Shadow | 🎖️ (Medal) |
+| **3500-3799** | Himedanshi / Himejoshi | Pink | Soft Pink Pulse animation | 🌸 (Sakura Trick) |
+| **3200-3499** | Otaku | Neon Teal (#00ffd0) | Sharp Neon Teal Text with 1px dark shadow | 🗡️ (Protagonist) |
+| **3000-3199** | Protagonist | Gold/Dark Gold | Golden Underline | 🗡️ (Protagonist) |
+
+### Competitive Tiers
+Standard competitive ranks following traditional competitive programming color schemes.
+
+| Rating | Title | Color Hex/Name | Visual Note |
+| :--- | :--- | :--- | :--- |
+| **2500-2999** | Legendary Grandmaster | Red (#ff0000) | Black first letter ("Nutella" style) |
+| **2400-2499** | Grandmaster | Red (#ff0000) | |
+| **2300-2399** | International Master | Orange (#ff8c00) | |
+| **2100-2299** | Master | Orange (#ff8c00) | |
+| **1900-2099** | Candidate Master | Violet (#aa00aa) | |
+| **1600-1899** | Expert | Blue (#0000ff) | |
+| **1400-1599** | Specialist | Cyan (#03a89e) | |
+| **1200-1399** | Pupil | Green (#008000) | |
+| **800-1199** | Beginner | Light Gray (#aaaaaa) | |
+| **400-799** | Newbie | Gray (#808080) | |
+| **0-399** | Lurker | Dark Gray (#555555) | |
+
+## Technical Implementation Details
+
+### Colors (Bocchi Palette)
+The top-tier (4000+) uses a specific rotation of colors for handles:
+- Pink: `#E7569D`
+- Red: `#E60416`
+- Gold: `#F3C047`
+- Blue: `#0067C0`
+- Purple: `#9B59B6`
+- Gray: `#808080`
+- Brown: `#8B4513`
+
+### CSS Animations
+- **yuri-bloom:** Cycles text-shadow between pink shades and white.
+- **yuri-float:** Subtle vertical bobbing (translateY -3px).
+- **subtle-pulse-purple:** Purple text-shadow pulsing.
+- **subtle-pulse-pink:** Pink text-shadow pulsing.
+
+### Perk Icons
+Icons are rendered using the `.perk-icon` class.
+- `👑 Crown Perk`: Yuri Overlord status.
+- `🎖️ Medal Perk`: Yaoi Master status.
+- `🌸 Sakura Trick`: Hime status (Soft pink pulsing glow).
+- `🗡️ Protagonist Perk`: Common to all 3000+ tiers.
+
+## Implementation Reference
+- **Logic:** `app.py` contains the `format_handle` filter for index-based color distribution.
+- **Styles:** `static/css/custom.css` defines the keyframes and tier classes.
+- **Display:** `templates/rating_system.html` provides the public-facing documentation.
