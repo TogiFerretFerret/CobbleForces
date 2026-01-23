@@ -1,3 +1,4 @@
 {
-    "rating": 1000
+    "rating": 1000,
+    "time_limit": "1000ms"
 }
