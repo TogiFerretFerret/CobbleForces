@@ -275,7 +275,7 @@ def submit():
     sub_id = contest_manager.save_submission(session['username'], contest_id, problem_id, 'Judging', 0)
     
     # Add to background queue
-    submission_queue.add_submission(sub_id, session['username'], filepath, contest_id, problem_id, time_limit=problem.time_limit)
+    submission_queue.add_submission(sub_id, session['username'], filepath, contest_id, problem_id, time_limit=problem.time_limit, memory_limit=problem.memory_limit)
     
     return redirect(url_for('view_submission', sub_id=sub_id))
 

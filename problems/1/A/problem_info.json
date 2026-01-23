@@ -1,3 +1,5 @@
 {
-    "rating": 800
+    "rating": 800,
+    "time_limit":"2000ms",
+    "memory_limit": "256MB"
 }

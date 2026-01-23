@@ -8,15 +8,16 @@ class Validator:
     def __init__(self):
         pass
     
-    def _set_limits(self, cpu_seconds):
+    def _set_limits(self, cpu_seconds, memory_limit_mb):
         # CPU time limit
         soft = int(cpu_seconds)
         hard = int(cpu_seconds) + 1
         resource.setrlimit(resource.RLIMIT_CPU, (soft, hard))
-        # 512MB Memory
-        resource.setrlimit(resource.RLIMIT_AS, (512 * 1024 * 1024, 512 * 1024 * 1024))
+        # Memory limit
+        bytes_limit = memory_limit_mb * 1024 * 1024
+        resource.setrlimit(resource.RLIMIT_AS, (bytes_limit, bytes_limit))
 
-    def judge_submission(self, source_path, contest_id, problem_id, max_points=100, on_test_complete=None, time_limit=2.0):
+    def judge_submission(self, source_path, contest_id, problem_id, max_points=100, on_test_complete=None, time_limit=2.0, memory_limit=512):
         if on_test_complete:
             on_test_complete({
                 "verdict": "Compiling",
@@ -100,7 +101,7 @@ class Validator:
                     capture_output=True, 
                     text=True, 
                     timeout=time_limit,
-                    preexec_fn=lambda: self._set_limits(time_limit)
+                    preexec_fn=lambda: self._set_limits(time_limit, memory_limit)
                 )
                 exec_time = int((time.time() - start_exec) * 1000)
                 actual_output = proc.stdout.strip()

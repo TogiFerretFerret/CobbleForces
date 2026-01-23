@@ -16,7 +16,7 @@ class SubmissionQueue:
             t = threading.Thread(target=self._worker, name=f"JudgeWorker-{i}", daemon=True)
             t.start()
 
-    def add_submission(self, sub_id, username, source_path, contest_id, problem_id, time_limit=2.0):
+    def add_submission(self, sub_id, username, source_path, contest_id, problem_id, time_limit=2.0, memory_limit=512):
         with self.results_lock:
             self.results[sub_id] = {'status': 'Queued', 'verdict': 'In Queue'}
         self.queue.put({
@@ -25,7 +25,8 @@ class SubmissionQueue:
             'source_path': source_path,
             'contest_id': contest_id,
             'problem_id': problem_id,
-            'time_limit': time_limit
+            'time_limit': time_limit,
+            'memory_limit': memory_limit
         })
 
     def _worker(self):
@@ -50,7 +51,8 @@ class SubmissionQueue:
                     task['problem_id'], 
                     max_points=100,
                     on_test_complete=update_progress,
-                    time_limit=task.get('time_limit', 2.0)
+                    time_limit=task.get('time_limit', 2.0),
+                    memory_limit=task.get('memory_limit', 512)
                 )
                 
                 # Save full result to a dedicated file atomatically

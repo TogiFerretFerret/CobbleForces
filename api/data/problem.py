@@ -8,6 +8,7 @@ class Problem:
         self.problem_dir = problem_dir
         self.rating = 800 # Default
         self.time_limit = 2.0 # Default in seconds
+        self.memory_limit = 512 # Default in MB
         
         # Load from metadata if exists
         info_path = os.path.join(problem_dir, 'problem_info.json')
@@ -27,6 +28,17 @@ class Problem:
                             self.time_limit = float(tl)
                     else:
                         self.time_limit = float(tl)
+
+                    ml = info.get('memory_limit', '512')
+                    if isinstance(ml, str):
+                        if ml.upper().endswith('MB'):
+                            self.memory_limit = int(ml[:-2])
+                        elif ml.upper().endswith('GB'):
+                            self.memory_limit = int(ml[:-2]) * 1024
+                        else:
+                            self.memory_limit = int(ml)
+                    else:
+                        self.memory_limit = int(ml)
             except:
                 pass
 
