@@ -28,12 +28,12 @@
                     </div>
                     <div class="row">
                         <div class="col-6 mb-3">
-                            <label class="form-label">Start (Timestamp)</label>
-                            <input type="number" name="start_time" class="form-control" value="{{ current_time | int }}" required>
+                            <label class="form-label">Start Time</label>
+                            <input type="datetime-local" name="start_time" class="form-control" value="{{ current_time | datetime_local }}" required>
                         </div>
                         <div class="col-6 mb-3">
-                            <label class="form-label">End (Timestamp)</label>
-                            <input type="number" name="end_time" class="form-control" value="{{ (current_time + 7200) | int }}" required>
+                            <label class="form-label">End Time</label>
+                            <input type="datetime-local" name="end_time" class="form-control" value="{{ (current_time + 7200) | datetime_local }}" required>
                         </div>
                     </div>
                     <div class="form-text mb-3">Current Timestamp: {{ current_time | int }}</div>

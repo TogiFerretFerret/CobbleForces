@@ -105,6 +105,10 @@ def get_rank_name(rating, gender='Male'):
 def format_datetime(value):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(value))
 
+@app.template_filter('datetime_local')
+def format_datetime_local(value):
+    return time.strftime('%Y-%m-%dT%H:%M', time.localtime(value))
+
 # --- ADMIN DECORATOR ---
 def admin_required(f):
     def decorator(*args, **kwargs):
@@ -290,16 +294,18 @@ def admin_dashboard():
 @admin_required
 def create_contest():
     name = request.form.get('name')
-    start_time = request.form.get('start_time')
-    end_time = request.form.get('end_time')
+    start_str = request.form.get('start_time')
+    end_str = request.form.get('end_time')
     
     try:
+        start_time = time.mktime(time.strptime(start_str, "%Y-%m-%dT%H:%M"))
+        end_time = time.mktime(time.strptime(end_str, "%Y-%m-%dT%H:%M"))
+        
         cid = contest_manager.create_contest(name, start_time, end_time)
-        # Create directory
         os.makedirs(os.path.join('problems', cid), exist_ok=True)
         return redirect(url_for('admin_dashboard', msg=f"Contest {cid} created!", msg_type="success"))
     except Exception as e:
-        return redirect(url_for('admin_dashboard', msg=f"Error: {e}", msg_type="error"))
+        return redirect(url_for('admin_dashboard', msg=f"Error parsing date: {e}", msg_type="error"))
 
 @app.route('/admin/edit_contest/<contest_id>', methods=['GET', 'POST'])
 @admin_required
@@ -309,17 +315,20 @@ def edit_contest(contest_id):
     
     if request.method == 'POST':
         name = request.form.get('name')
-        start = request.form.get('start_time')
-        end = request.form.get('end_time')
+        start_str = request.form.get('start_time')
+        end_str = request.form.get('end_time')
         
         try:
+            start_time = time.mktime(time.strptime(start_str, "%Y-%m-%dT%H:%M"))
+            end_time = time.mktime(time.strptime(end_str, "%Y-%m-%dT%H:%M"))
+            
             contest_manager.contests[contest_id]['name'] = name
-            contest_manager.contests[contest_id]['start_time'] = float(start)
-            contest_manager.contests[contest_id]['end_time'] = float(end)
+            contest_manager.contests[contest_id]['start_time'] = float(start_time)
+            contest_manager.contests[contest_id]['end_time'] = float(end_time)
             contest_manager.save_contests()
             return redirect(url_for('admin_dashboard', msg="Contest updated", msg_type="success"))
         except Exception as e:
-            return redirect(url_for('admin_dashboard', msg=f"Error: {e}", msg_type="error"))
+            return redirect(url_for('admin_dashboard', msg=f"Error parsing date: {e}", msg_type="error"))
             
     return render_template('edit_contest.html', contest=contest)
 

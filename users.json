@@ -1,31 +1,7 @@
 {
-    "Wiley": {
-        "password": "123",
-        "rating": 1605,
-        "is_admin": false,
-        "gender": "Male"
-    },
-    "Jayden": {
-        "password": "123",
-        "rating": 2156,
-        "is_admin": false,
-        "gender": "Male"
-    },
-    "Ethan": {
-        "password": "123",
-        "rating": 3058,
-        "is_admin": false,
-        "gender": "Male"
-    },
-    "Zoe": {
-        "password": "123",
-        "rating": 2793,
-        "is_admin": false,
-        "gender": "Female"
-    },
     "Riverxia": {
         "password": "123",
-        "rating": 3600,
+        "rating": 1600,
         "is_admin": true,
         "gender": "Male"
     }
