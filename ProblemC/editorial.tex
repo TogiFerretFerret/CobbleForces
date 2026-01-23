@@ -1,0 +1,83 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\geometry{letterpaper, margin=1in}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\title{\textbf{Editorial: Problem C - Jayden's T-Spin Setup}}
+\author{Setter: Hudson}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Problem Overview}
+We are tasked with simulating a simplified game of Tetris. We have a $10 \times 20$ grid. Pieces (I, O, T, L, J, S, Z) are dropped one by one into specific columns without rotation. We need to determine the final height of the stack, or report "Game Over" if it exceeds height 20.
+
+\section*{Key Challenges}
+\begin{enumerate}
+    \item \textbf{Grid Representation:} We need a way to store which cells are occupied. A 2D boolean array \texttt{grid[row][col]} works perfectly. Since the max height is 20, but we need to detect overflows, we can make the array slightly larger (e.g., 50 rows) to safely handle calculations above the ceiling.
+    \item \textbf{Shape Definitions:} Each piece type occupies a specific set of cells relative to its "anchor" (bottom-left corner). Hardcoding these shapes is the most robust way to handle them.
+    \item \textbf{Collision Detection:} "Dropping" a piece means finding the lowest row $R$ such that the piece fits at row $R$ but would collide with existing blocks (or the floor) at row $R-1$.
+\end{enumerate}
+
+\section*{Solution Approach}
+1. \textbf{Data Structure:} Initialize a boolean grid \texttt{grid[50][12]} to false. Note that we use 1-based indexing for columns $1 \dots 10$.
+2. \textbf{Shape Mapping:} Create a helper function that returns the list of occupied relative coordinates $(dr, dc)$ for each piece type.
+   \begin{itemize}
+       \item Example T-Piece: $(0,0), (0,1), (0,2)$ (Bottom row) and $(1,1)$ (Top row middle).
+   \end{itemize}
+3. \textbf{Simulation Loop:} For each piece input (Type $T$, Column $C$):
+   \begin{itemize}
+       \item Start trying to place the piece at a high row (e.g., Row 25).
+       \item Check if moving the piece down by 1 row causes a collision.
+       \item A collision happens if:
+       \begin{itemize}
+           \item The new row index would be 0 (Floor).
+           \item Any block of the piece overlaps with a \texttt{true} cell in the grid.
+       \end{itemize}
+       \item Once the lowest valid position is found, mark those cells as \texttt{true} in the grid.
+       \item \textbf{Game Over Check:} If any part of the newly placed piece is at Row $> 20$, print "Game Over" and exit.
+   \end{itemize}
+4. \textbf{Final Output:} If no overflow occurred after $N$ pieces, scan the grid to find the highest row index that contains a \texttt{true} value.
+
+\section*{Complexity}
+\begin{itemize}
+    \item \textbf{Time Complexity:} $O(N \times H)$, where $N$ is the number of pieces and $H$ is the simulation height. Since $H$ is small constant (approx 25), this is effectively $O(N)$.
+    \item \textbf{Space Complexity:} $O(H \times W)$ for the grid, which is negligible constant space.
+\end{itemize}
+
+\section*{Implementation (C++)}
+(See reference solution code)
+
+\end{document}

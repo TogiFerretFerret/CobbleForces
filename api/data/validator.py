@@ -13,16 +13,12 @@ class Validator:
         # 512MB Memory
         resource.setrlimit(resource.RLIMIT_AS, (512 * 1024 * 1024, 512 * 1024 * 1024))
 
-    def judge_submission(self, source_path, problem_id, max_points=100):
+    def judge_submission(self, source_path, contest_id, problem_id, max_points=100):
         # 1. Compile
         exe_path = source_path + ".exe"
         compile_cmd = ["g++", "-O2", "-o", exe_path, source_path]
         
         try:
-            # Compile without sandbox (compilers are trusted usually, but could be sandboxed too)
-            # For simplicity, we assume compilation is safe or at least doesn't need strict sandboxing
-            # (though malicious macros exist, preventing file access is good).
-            # Let's run compiler normally for now to avoid include path issues with bwrap.
             subprocess.run(compile_cmd, check=True, capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
             return {
@@ -33,7 +29,16 @@ class Validator:
             }
 
         # 2. Find Test Cases
-        problem_dir = os.path.join("problems", problem_id)
+        # Look in problems/<contest_id>/<problem_id>/
+        problem_dir = os.path.join("problems", str(contest_id), problem_id)
+        if not os.path.exists(problem_dir):
+             return {
+                "verdict": "IE", # Internal Error (Problem not found)
+                "score": 0,
+                "max_points": max_points,
+                "details": "Problem directory not found."
+            }
+
         inputs = sorted(glob.glob(os.path.join(problem_dir, "input_*.txt")))
         
         tests = []
@@ -43,7 +48,6 @@ class Validator:
         overall_verdict = "AC"
         
         # Sandbox command base
-        # Using bwrap to allow read-only access to root, isolate everything else
         sandbox_cmd = [
             "bwrap",
             "--ro-bind", "/", "/", 
@@ -51,12 +55,10 @@ class Validator:
             "--proc", "/proc",
             "--unshare-all",
             "--die-with-parent",
-            # We don't need network
             exe_path
         ]
 
         for input_file in inputs:
-            # Expected output file
             filename = os.path.basename(input_file)
             test_case_num = filename.replace("input_", "").replace(".txt", "")
             output_file = os.path.join(problem_dir, f"output_{test_case_num}.txt")
@@ -73,7 +75,6 @@ class Validator:
             status = "AC"
             
             try:
-                # Run with timeout (wall clock) + resource limits (CPU/Mem)
                 proc = subprocess.run(
                     sandbox_cmd, 
                     input=input_data, 
@@ -85,14 +86,12 @@ class Validator:
                 actual_output = proc.stdout.strip()
                 
                 if proc.returncode != 0:
-                    # Check if it was killed by signal
                     if proc.returncode < 0:
-                        # -9 is SIGKILL, -24 is SIGXCPU
                         if proc.returncode == -24: # SIGXCPU
                             status = "TLE"
                         else:
                             status = "RE"
-                    elif proc.returncode == 152: # bwrap exit code for SIGXCPU (128 + 24)
+                    elif proc.returncode == 152: # bwrap exit code for SIGXCPU
                         status = "TLE"
                     else:
                         status = "RE" 
@@ -119,11 +118,9 @@ class Validator:
             elif overall_verdict == "AC":
                 overall_verdict = status
         
-        # Cleanup
         if os.path.exists(exe_path):
             os.remove(exe_path)
 
-        # Calculate Score
         if total_tests > 0:
             score = int((passed_count / total_tests) * max_points)
         else:

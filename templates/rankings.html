@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Rating - CobbleForces{% endblock %}
+
+{% block content %}
+<div class="col-12">
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <h4 class="text-primary mb-4">Rating</h4>
+            
+            <div class="table-responsive">
+                <table class="table table-bordered table-cf table-hover table-striped">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="rank-cell">#</th>
+                            <th class="user-cell">Who</th>
+                            <th>Rating</th>
+                            <th>Title</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in rankings %}
+                        <tr {% if user.username == current_user %}class="table-info"{% endif %}>
+                            <td class="text-center">{{ loop.index }}</td>
+                            <td class="user-cell">
+                                {{ user.username | handle(user.rating) }}
+                            </td>
+                            <td class="text-center fw-bold">
+                                {{ user.rating }}
+                            </td>
+                            <td class="text-center text-muted">
+                                {{ user.rating | rank_name(user.gender) }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

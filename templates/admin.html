@@ -1,93 +1,150 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
-    <style>
-        body { font-family: sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; background: #f0f0f0; }
-        .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h1, h2 { color: #333; }
-        .section { margin-bottom: 30px; border-bottom: 1px solid #ccc; padding-bottom: 20px; }
-        label { display: block; margin-top: 10px; font-weight: bold; }
-        input, select { padding: 8px; width: 100%; max-width: 400px; margin-bottom: 10px; }
-        button { background: #007bff; color: white; padding: 10px 15px; border: none; cursor: pointer; border-radius: 4px; }
-        button:hover { background: #0056b3; }
-        button.danger { background: #dc3545; }
-        button.danger:hover { background: #c82333; }
-        .msg { padding: 10px; margin-bottom: 10px; border-radius: 4px; }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background: #eee; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <a href="/" style="float:right;">← Back to Home</a>
-        <h1>Admin Dashboard 🛠️</h1>
-        
-        {% if msg %}
-            <div class="msg {{ msg_type }}">{{ msg }}</div>
-        {% endif %}
+{% extends "base.html" %}
 
-        <div class="section">
-            <h2>Contest Control</h2>
-            <form action="/admin/update_contest" method="post">
-                <label>Start Time (Timestamp):</label>
-                <input type="number" name="start_time" value="{{ contest_state.start_time }}">
-                
-                <label>End Time (Timestamp):</label>
-                <input type="number" name="end_time" value="{{ contest_state.end_time }}">
-                <small>Current Time: {{ current_time }}</small>
-                <br><br>
-                <button type="submit">Update Times</button>
-            </form>
-            <br>
-            <form action="/admin/reset_contest" method="post" onsubmit="return confirm('Are you sure? This deletes ALL submissions.');">
-                <button type="submit" class="danger">⚠️ Reset Contest (Clear Submissions)</button>
-            </form>
-        </div>
+{% block title %}Admin Dashboard - CobbleForces{% endblock %}
 
-        <div class="section">
-            <h2>User Management</h2>
-            <form action="/admin/add_user" method="post">
-                <input type="text" name="username" placeholder="Username" required style="width: 150px; display: inline-block;">
-                <input type="text" name="password" placeholder="Password" required style="width: 150px; display: inline-block;">
-                <label style="display:inline;"><input type="checkbox" name="is_admin" style="width:auto;"> Admin?</label>
-                <button type="submit">Add User</button>
-            </form>
-            
-            <table>
-                <tr>
-                    <th>Username</th>
-                    <th>Rating</th>
-                    <th>Role</th>
-                    <th>Action</th>
-                </tr>
-                {% for u, data in users.items() %}
-                <tr>
-                    <td>{{ u }}</td>
-                    <td>{{ data.rating }}</td>
-                    <td>{{ 'Admin' if data.is_admin else 'User' }}</td>
-                    <td>
-                        {% if u != current_user %}
-                        <form action="/admin/delete_user" method="post" style="display:inline;">
-                            <input type="hidden" name="username" value="{{ u }}">
-                            <button type="submit" class="danger" style="padding: 2px 5px; font-size: 0.8em;">Delete</button>
-                        </form>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </table>
+{% block content %}
+<div class="mb-4">
+    <h1>🛠️ Admin Dashboard</h1>
+    {% if msg %}
+        <div class="alert alert-{{ 'success' if msg_type == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+            {{ msg }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        
-        <div class="section">
-            <h2>Problem Management</h2>
-            <p>To add problems, upload a folder or zip manually to the server's <code>problems/</code> directory for now.</p>
-            <p>Detected Problems: {{ problems|join(', ') }}</p>
+    {% endif %}
+</div>
+
+<div class="row">
+    <!-- CONTEST CONTROL -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="m-0">⏱️ Create Contest</h5>
+            </div>
+            <div class="card-body">
+                <form action="/admin/create_contest" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Contest Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. CobbleForces Round #2" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Start (Timestamp)</label>
+                            <input type="number" name="start_time" class="form-control" value="{{ current_time | int }}" required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">End (Timestamp)</label>
+                            <input type="number" name="end_time" class="form-control" value="{{ (current_time + 7200) | int }}" required>
+                        </div>
+                    </div>
+                    <div class="form-text mb-3">Current Timestamp: {{ current_time | int }}</div>
+                    <button type="submit" class="btn btn-primary w-100">Create Contest</button>
+                </form>
+            </div>
         </div>
     </div>
-</body>
-</html>
+
+    <!-- EXISTING CONTESTS -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="m-0">📅 Existing Contests</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for c in contests %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ c.name }} (ID: {{ c.id }})</h6>
+                            <small>{{ c.start_time | datetime }}</small>
+                        </div>
+                        <form action="/admin/calculate_ratings" method="post" class="mt-2" onsubmit="return confirm('Update ratings for {{ c.name }}?');">
+                            <input type="hidden" name="contest_id" value="{{ c.id }}">
+                            <button type="submit" class="btn btn-sm btn-outline-warning w-100">🔄 Update Ratings</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- USER MANAGEMENT -->
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="m-0">👥 User Management</h5>
+                <span class="badge bg-light text-dark">{{ users|length }} Users</span>
+            </div>
+            <div class="card-body">
+                <form action="/admin/add_user" method="post" class="row g-3 align-items-center mb-4 border-bottom pb-4">
+                    <div class="col-auto">
+                        <input type="text" name="username" class="form-control" placeholder="New Username" required>
+                    </div>
+                    <div class="col-auto">
+                        <input type="text" name="password" class="form-control" placeholder="Password" required>
+                    </div>
+                    <div class="col-auto">
+                        <select name="gender" class="form-select">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_admin" id="adminCheck">
+                            <label class="form-check-label" for="adminCheck">Admin?</label>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-success">Add User</button>
+                    </div>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Username</th>
+                                <th>Rating</th>
+                                <th>Role</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u, data in users.items() %}
+                            <tr>
+                                <td class="fw-bold">{{ u | handle(data.rating) }}</td>
+                                <td>
+                                    <form action="/admin/update_rating" method="post" class="d-flex gap-2">
+                                        <input type="hidden" name="username" value="{{ u }}">
+                                        <input type="number" name="rating" value="{{ data.rating }}" class="form-control form-control-sm" style="width: 80px;">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary" title="Update Rating">💾</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    {% if data.is_admin %}
+                                        <span class="badge bg-warning text-dark">Admin</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">User</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if u != current_user %}
+                                    <form action="/admin/delete_user" method="post" class="d-inline" onsubmit="return confirm('Delete user {{ u }}?');">
+                                        <input type="hidden" name="username" value="{{ u }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-muted small">(It's you)</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

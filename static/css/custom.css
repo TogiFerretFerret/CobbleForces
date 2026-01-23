@@ -1,0 +1,89 @@
+/* Codeforces-y Theme */
+body {
+    font-family: verdana, arial, sans-serif;
+    font-size: 14px;
+    background-color: #ffffff;
+    color: #000;
+}
+
+/* Navbar imitating CF */
+.navbar-custom {
+    background-color: #333;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+.navbar-custom .nav-link {
+    color: #efefef !important;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 13px;
+    padding: 10px 15px;
+}
+.navbar-custom .nav-link:hover {
+    background-color: #555;
+    border-radius: 3px;
+}
+
+/* Content Area */
+.content-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-top: 20px;
+}
+
+/* Sidebar */
+.sidebar-box {
+    border: 1px solid #b9b9b9;
+    background-color: #fff;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+.sidebar-title {
+    color: #3b5998;
+    border-bottom: 1px solid #b9b9b9;
+    font-weight: bold;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+/* Tables */
+.table-cf th {
+    font-size: 0.9em;
+    color: #555;
+    text-align: center;
+}
+.table-cf td {
+    font-size: 0.95em;
+    vertical-align: middle;
+}
+.table-cf .rank-cell { width: 40px; }
+.table-cf .user-cell { text-align: left; font-weight: bold; }
+
+/* Verdicts */
+.verdict-AC { color: #00a900; font-weight: bold; }
+.verdict-WA { color: red; font-weight: bold; }
+.verdict-TLE { color: #0000ff; font-weight: bold; } /* CF uses blue for TLE sometimes or just bold text */
+.verdict-RE { color: #0000ff; font-weight: bold; }
+.verdict-CE { color: #888; font-weight: bold; }
+
+/* Rating Colors */
+.user-newbie { color: #808080 !important; font-weight: bold; }
+.user-pupil { color: #008000 !important; font-weight: bold; }
+.user-specialist { color: #03a89e !important; font-weight: bold; }
+.user-expert { color: #0000ff !important; font-weight: bold; }
+.user-candidate-master { color: #aa00aa !important; font-weight: bold; }
+.user-master { color: #ff8c00 !important; font-weight: bold; }
+.user-grandmaster { color: #ff0000 !important; font-weight: bold; }
+.user-legendary { color: #ff0000 !important; font-weight: bold; }
+.legendary-first { color: #000000 !important; }
+.user-yuri { font-weight: bold; }
+
+/* Footer */
+.footer {
+    font-size: 0.8em;
+    text-align: center;
+    margin-top: 50px;
+    padding: 20px;
+    color: #555;
+}

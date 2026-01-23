@@ -21,5 +21,8 @@ class UserManager:
     def get_rating(self, username):
         return self.users.get(username, {}).get('rating', 0)
 
+    def get_gender(self, username):
+        return self.users.get(username, {}).get('gender', 'Male')
+
     def is_admin(self, username):
         return self.users.get(username, {}).get('is_admin', False)

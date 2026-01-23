@@ -1,37 +1,23 @@
 {% extends "base.html" %}
 
+{% block title %}{{ contest.name }} - Dashboard{% endblock %}
+
 {% block content %}
     {% if not logged_in %}
-    <div class="col-12 text-center" style="padding: 50px;">
-        <h1 class="display-4">Welcome to CobbleForces</h1>
-        <p class="lead">The only judge where the ELO is real and the problems are memes.</p>
-        
-        <div class="card mx-auto shadow-sm" style="max-width: 400px; margin-top: 30px;">
-            <div class="card-body text-start">
-                <h5 class="card-title mb-3">Login</h5>
-                <form action="/login" method="post">
-                    <div class="mb-3">
-                        <label class="form-label">Handle</label>
-                        <input type="text" name="username" class="form-control" placeholder="e.g. tourist" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Password</label>
-                        <input type="password" name="password" class="form-control" required>
-                    </div>
-                    <button type="submit" class="btn btn-outline-primary w-100 mb-2">Login</button>
-                    <div class="text-center">
-                        <a href="/register" class="text-decoration-none small">Register</a>
-                    </div>
-                </form>
-            </div>
+        <div class="col-12 text-center p-5">
+             <h3>Please Login to participate in {{ contest.name }}</h3>
+             <a href="/" class="btn btn-primary">Go to Login</a>
         </div>
-    </div>
     {% else %}
     
-    <!-- MAIN CONTENT: Problem List & Submissions -->
+    <div class="col-12 mb-3">
+        <h3><a href="/" class="text-decoration-none text-muted">Contests</a> / {{ contest.name }}</h3>
+    </div>
+
+    <!-- MAIN CONTENT -->
     <div class="col-md-9">
         <div class="card shadow-sm mb-4">
-            <div class="card-header bg-white border-bottom-0">
+            <div class="card-header bg-white">
                 <h5 class="text-primary m-0">Problems</h5>
             </div>
             <table class="table table-bordered table-cf table-hover m-0">
@@ -48,18 +34,20 @@
                     <tr>
                         <td class="text-center fw-bold">{{ p.id }}</td>
                         <td>
-                            <a href="#" onclick="selectProblem('{{ p.id }}'); return false;" class="text-decoration-none fw-bold" style="color: #333;">Problem {{ p.id }}</a>
+                            <a href="#" onclick="selectProblem('{{ p.id }}'); return false;" class="text-decoration-none fw-bold text-dark">
+                                Problem {{ p.id }}
+                            </a>
                         </td>
                         <td class="text-center text-muted">{{ p.points }}</td>
                         <td class="text-center">
                             {% if p.has_pdf %}
-                                <a href="/problem/{{ p.id }}/pdf" target="_blank" title="View PDF">📄</a>
+                                <a href="/problem/{{ contest.id }}/{{ p.id }}/pdf" target="_blank" title="View PDF">📄</a>
                             {% endif %}
                             {% if p.has_editorial %}
                                 {% if is_contest_over %}
-                                    <a href="/problem/{{ p.id }}/editorial" target="_blank" title="View Editorial" class="ms-2">🔓</a>
+                                    <a href="/problem/{{ contest.id }}/{{ p.id }}/editorial" target="_blank" title="View Editorial" class="ms-2">🔓</a>
                                 {% else %}
-                                    <span class="text-muted ms-2" title="Editorial Locked">🔒</span>
+                                    <span class="text-muted ms-2" title="Locked">🔒</span>
                                 {% endif %}
                             {% endif %}
                         </td>
@@ -75,6 +63,7 @@
             </div>
             <div class="card-body">
                 <form action="/submit" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="contest_id" value="{{ contest.id }}">
                     <div class="row align-items-end">
                         <div class="col-md-3">
                             <label class="form-label small text-muted">Problem</label>
@@ -98,7 +87,7 @@
         
         <div class="card shadow-sm">
              <div class="card-header bg-white">
-                <h6 class="m-0">My Submissions</h6>
+                <h6 class="m-0">My Submissions ({{ contest.name }})</h6>
             </div>
             <div class="card-body p-0">
                 {% if submissions %}
@@ -117,7 +106,7 @@
                         <tr>
                             <td class="text-muted small">{{ loop.index }}</td>
                             <td class="small">{{ sub.time }}</td>
-                            <td><a href="#">{{ sub.problem }}</a></td>
+                            <td>{{ sub.problem }}</td>
                             <td class="verdict-{{ sub.verdict }} small">{{ sub.verdict }}</td>
                             <td class="small">{{ sub.score if sub.score is defined else '-' }}</td>
                         </tr>
@@ -125,7 +114,7 @@
                     </tbody>
                 </table>
                 {% else %}
-                <div class="p-3 text-center small text-muted">No submissions</div>
+                <div class="p-3 text-center small text-muted">No submissions for this contest.</div>
                 {% endif %}
             </div>
         </div>
@@ -150,9 +139,8 @@
         <div class="sidebar-box">
             <div class="sidebar-title">Useful Links</div>
             <ul class="list-unstyled mb-0" style="font-size: 0.95em;">
-                <li><a href="/standings" class="text-decoration-none">→ Standings</a></li>
-                <li><a href="/rankings" class="text-decoration-none">→ Rating</a></li>
-                <li><a href="#" class="text-decoration-none text-muted">→ Announcements</a></li>
+                <li><a href="/contest/{{ contest.id }}/standings" class="text-decoration-none">→ Standings</a></li>
+                <li><a href="/rankings" class="text-decoration-none">→ Global Rating</a></li>
             </ul>
         </div>
     </div>
@@ -179,7 +167,6 @@
     
     function updateTimer() {
         const display = document.getElementById('main-timer');
-        
         if (!display) return;
 
         if (remainingSeconds <= 0) {

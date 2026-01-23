@@ -1,62 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Submission Result</title>
-    <style>
-        body { font-family: monospace; max-width: 800px; margin: 2rem auto; padding: 0 1rem; background: #222; color: #ddd; }
-        .container { background: #333; padding: 2rem; border-radius: 8px; }
-        .verdict { font-size: 2em; font-weight: bold; margin-bottom: 10px; }
-        .score-display { font-size: 1.5em; margin-bottom: 20px; color: #fff; border-bottom: 1px solid #555; padding-bottom: 20px; }
-        .score-points { color: #007bff; }
-        
-        .AC { color: #0f0; }
-        .WA { color: #f00; }
-        .CE { color: #ff0; }
-        .TLE { color: #ffa500; }
-        .RE { color: #ffa500; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #555; padding: 8px; text-align: left; }
-        th { background: #444; }
-        
-        .back-btn { display: inline-block; margin-top: 30px; background: #007bff; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 4px; font-weight: bold; font-family: sans-serif; }
-        .back-btn:hover { background: #0056b3; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Submission for Problem {{ problem_id }}</h1>
-        
-        <div class="verdict {{ result.verdict }}">
-            Verdict: {{ result.verdict }}
-        </div>
-        
-        <div class="score-display">
-            Score: <span class="score-points">{{ result.score }} / {{ result.max_points }}</span>
+{% extends "base.html" %}
+
+{% block title %}Submission Result - CobbleForces{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-lg mb-4">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Submission for Problem {{ problem_id }}</h4>
+                <a href="/" class="btn btn-sm btn-outline-light">Back to Dashboard</a>
+            </div>
+            <div class="card-body text-center py-5">
+                <h1 class="display-1 verdict-{{ result.verdict }} mb-3">{{ result.verdict }}</h1>
+                <h4 class="text-muted">Score: <span class="text-primary">{{ result.score }}</span> / {{ result.max_points }}</h4>
+            </div>
         </div>
 
         {% if result.verdict == 'CE' %}
-            <h3>Compilation Error:</h3>
-            <pre>{{ result.details }}</pre>
+        <div class="card border-warning mb-4">
+            <div class="card-header bg-warning text-dark">
+                <strong>⚠️ Compilation Error</strong>
+            </div>
+            <div class="card-body bg-light">
+                <pre class="m-0">{{ result.details }}</pre>
+            </div>
+        </div>
         {% else %}
-            <table>
-                <tr>
-                    <th>Test Case</th>
-                    <th>Status</th>
-                    <th>Time</th>
-                </tr>
-                {% for test in result.tests %}
-                <tr>
-                    <td>{{ test.case }}</td>
-                    <td class="{{ test.status }}">{{ test.status }}</td>
-                    <td>{{ test.time }}</td>
-                </tr>
-                {% endfor %}
-            </table>
+        
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <strong>Test Cases</strong>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>Test Case</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for test in result.tests %}
+                        <tr>
+                            <td>#{{ test.case }}</td>
+                            <td class="verdict-{{ test.status }}">{{ test.status }}</td>
+                            <td>{{ test.time }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
         {% endif %}
-
-        <a href="/" class="back-btn">← Back to Dashboard</a>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Register - CobbleForces{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg border-0">
+            <div class="card-body p-5">
+                <h2 class="mb-4 text-center">Join CobbleForces</h2>
+                <form action="/register" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Handle</label>
+                        <input type="text" name="username" class="form-control" placeholder="e.g. Tourist" required>
+                        <div class="form-text">Choose a unique username.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" placeholder="••••••" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Gender</label>
+                        <select name="gender" class="form-select">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <div class="form-text">Determines your rank title (e.g., Fudanshi vs Fujoshi).</div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">Register</button>
+                        <a href="/" class="btn btn-outline-secondary">Back to Login</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

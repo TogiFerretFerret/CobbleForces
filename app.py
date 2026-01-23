@@ -3,6 +3,7 @@ import time
 import shutil
 import json
 from flask import Flask, request, render_template, make_response, send_from_directory, abort, session, redirect, url_for, flash
+from markupsafe import Markup
 from api.data.users import UserManager
 from api.data.problem import ProblemManager
 from api.data.contest import ContestManager
@@ -20,166 +21,185 @@ problem_manager = ProblemManager()
 contest_manager = ContestManager()
 validator = Validator()
 
+# --- CONTEXT PROCESSOR ---
+@app.context_processor
+def inject_user():
+    username = session.get('username')
+    is_admin_user = False
+    rating = 0
+    gender = 'Male'
+    if username:
+        is_admin_user = user_manager.is_admin(username)
+        rating = user_manager.get_rating(username)
+        gender = user_manager.get_gender(username)
+    return dict(current_user=username, is_admin=is_admin_user, current_user_rating=rating, current_user_gender=gender)
+
+# --- TEMPLATE FILTERS ---
+@app.template_filter('handle')
+def format_handle(username, rating=None):
+    if not username: return ""
+    try:
+        r = int(rating) if rating is not None else 0
+    except:
+        r = 0
+        
+    cls = "user-newbie"
+    if r < 1200: cls = "user-newbie"
+    elif r < 1400: cls = "user-pupil"
+    elif r < 1600: cls = "user-specialist"
+    elif r < 1900: cls = "user-expert"
+    elif r < 2100: cls = "user-candidate-master"
+    elif r < 2300: cls = "user-master"
+    elif r < 2400: cls = "user-international-master"
+    elif r < 2500: cls = "user-grandmaster"
+    elif r < 3000: cls = "user-legendary"
+    elif r < 3600: cls = "user-yaoi"
+    else: cls = "user-yuri"
+
+    # Yuri Case (Bocchi Themed) >= 3600
+    if r >= 3600:
+        colors = ['#E7569D', '#E60416', '#F3C047', '#0067C0', '#F3C047', '#9B59B6', '#808080', '#8B4513']
+        formatted_name = ""
+        for i, char in enumerate(username):
+            color = colors[i % len(colors)]
+            formatted_name += f'<span style="color: {color}; font-weight: bold;">{char}</span>'
+        return Markup(f'<span class="user-yuri" style="font-weight: bold;">{formatted_name}</span>')
+
+    # Yaoi Case (Black + Purple) 3000 <= r < 3600
+    if r >= 3000 and r < 3600:
+        first = username[0]
+        rest = username[1:]
+        # Deep Purple #800080
+        return Markup(f'<span style="font-weight:bold"><span class="legendary-first">{first}</span><span style="color:#800080">{rest}</span></span>')
+
+    # Nutella case (Legendary GM) 2500 <= r < 3000
+    if r >= 2500 and r < 3000:
+        first = username[0]
+        rest = username[1:]
+        return Markup(f'<span class="{cls}"><span class="legendary-first">{first}</span>{rest}</span>')
+    
+    return Markup(f'<span class="{cls}">{username}</span>')
+
+@app.template_filter('rank_name')
+def get_rank_name(rating, gender='Male'):
+    try: r = int(rating)
+    except: r = 0
+    
+    # Defaults
+    if gender not in ['Male', 'Female']: gender = 'Male' # Treat others as Male for titles for now unless specified
+    
+    if r < 1200: return "Newbie"
+    elif r < 1400: return "Pupil"
+    elif r < 1600: return "Specialist"
+    elif r < 1900: return "Expert"
+    elif r < 2100: return "Candidate Master"
+    elif r < 2300: return "Master"
+    elif r < 2400: return "International Master"
+    elif r < 2500: return "Grandmaster"
+    elif r < 3000: return "Legendary Grandmaster"
+    elif r < 3600:
+        return "Fujoshi" if gender == "Female" else "Fudanshi"
+    return "Yurijoshi" if gender == "Female" else "Yuridanshi"
+
+@app.template_filter('datetime')
+def format_datetime(value):
+    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(value))
+
 # --- ADMIN DECORATOR ---
 def admin_required(f):
     def decorator(*args, **kwargs):
-        if 'username' not in session:
-            return redirect(url_for('login'))
-        if not user_manager.is_admin(session['username']):
-            return abort(403)
+        if 'username' not in session: return redirect(url_for('login'))
+        if not user_manager.is_admin(session['username']): return abort(403)
         return f(*args, **kwargs)
     decorator.__name__ = f.__name__
     return decorator
 
 # --- ROUTES ---
 
-@app.route('/admin')
-@admin_required
-def admin_dashboard():
-    # Reload managers to get fresh data
-    global user_manager, contest_manager
-    user_manager = UserManager() 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'GET':
+        return render_template('register.html')
     
-    users = user_manager.users
-    probs = [p.id for p in problem_manager.get_all_problems()]
-    
-    return render_template('admin.html', 
-                           users=users, 
-                           contest_state={'start_time': contest_manager.start_time, 'end_time': contest_manager.end_time},
-                           current_time=time.time(),
-                           problems=probs,
-                           current_user=session['username'],
-                           msg=request.args.get('msg'),
-                           msg_type=request.args.get('msg_type'))
-
-@app.route('/admin/update_contest', methods=['POST'])
-@admin_required
-def update_contest():
-    try:
-        start = float(request.form.get('start_time'))
-        end = float(request.form.get('end_time'))
-        contest_manager.start_time = start
-        contest_manager.end_time = end
-        contest_manager._save_state()
-        return redirect(url_for('admin_dashboard', msg="Contest times updated", msg_type="success"))
-    except ValueError:
-        return redirect(url_for('admin_dashboard', msg="Invalid timestamp format", msg_type="error"))
-
-@app.route('/admin/reset_contest', methods=['POST'])
-@admin_required
-def reset_contest():
-    # Clear submissions data
-    with open(contest_manager.data_file, 'w') as f:
-        json.dump({}, f)
-    
-    # Reload contest manager's internal cache if any
-    # (ContestManager loads on each call in get_user_submissions so we are good, 
-    # but let's be safe if we add caching later)
-    
-    # Delete submission files?
-    # shutil.rmtree(UPLOAD_FOLDER)
-    # os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-    
-    return redirect(url_for('admin_dashboard', msg="Contest submissions reset!", msg_type="success"))
-
-@app.route('/admin/add_user', methods=['POST'])
-@admin_required
-def add_user():
     u = request.form.get('username')
     p = request.form.get('password')
-    is_admin = request.form.get('is_admin') == 'on'
+    g = request.form.get('gender')
     
     if u in user_manager.users:
-        return redirect(url_for('admin_dashboard', msg="User already exists", msg_type="error"))
+        return "Username taken. <a href='/register'>Try Again</a>"
     
-    user_manager.users[u] = {'password': p, 'rating': 1500, 'is_admin': is_admin}
-    # Save
+    # Register user
+    user_manager.users[u] = {
+        'password': p, 
+        'rating': 1500, # Default
+        'is_admin': False,
+        'gender': g
+    }
     with open(user_manager.users_file, 'w') as f:
         json.dump(user_manager.users, f, indent=4)
         
-    return redirect(url_for('admin_dashboard', msg="User added", msg_type="success"))
-
-@app.route('/admin/delete_user', methods=['POST'])
-@admin_required
-def delete_user():
-    u = request.form.get('username')
-    if u == session['username']:
-         return redirect(url_for('admin_dashboard', msg="Cannot delete yourself", msg_type="error"))
-         
-    if u in user_manager.users:
-        del user_manager.users[u]
-        with open(user_manager.users_file, 'w') as f:
-            json.dump(user_manager.users, f, indent=4)
-            
-    return redirect(url_for('admin_dashboard', msg="User deleted", msg_type="success"))
-
-@app.route('/login', methods=['POST'])
-def login():
-    username = request.form.get('username')
-    password = request.form.get('password')
-    
-    if user_manager.validate_login(username, password):
-        session['username'] = username
-        return redirect(url_for('index'))
-    else:
-        return "Invalid Username or Password. <a href='/'>Try Again</a>"
-
-@app.route('/logout')
-def logout():
-    session.pop('username', None)
+    session['username'] = u
     return redirect(url_for('index'))
 
 @app.route('/')
 def index():
+    # List of Contests
+    contests = contest_manager.get_all_contests()
+    now = time.time()
+    return render_template('contests.html', contests=contests, now=now)
+
+@app.route('/contest/<contest_id>')
+def contest_dashboard(contest_id):
+    contest = contest_manager.get_contest(contest_id)
+    if not contest: abort(404)
+    
     if 'username' not in session:
-        return render_template('index.html', logged_in=False)
+        return render_template('contest_dashboard.html', contest=contest, logged_in=False)
 
     username = session['username']
-    problems = problem_manager.get_all_problems()
-    
-    time_remaining = contest_manager.get_time_remaining()
-    is_contest_over = contest_manager.is_over()
+    problems = problem_manager.get_contest_problems(contest_id)
+    time_remaining = contest_manager.get_time_remaining(contest_id)
+    is_contest_over = contest_manager.is_over(contest_id)
+    user_subs = contest_manager.get_user_submissions(username, contest_id)
 
-    user_subs = contest_manager.get_user_submissions(username)
+    return render_template('contest_dashboard.html', 
+                           logged_in=True,
+                           username=username,
+                           contest=contest,
+                           problems=problems,
+                           time_remaining=time_remaining,
+                           is_contest_over=is_contest_over,
+                           submissions=user_subs)
 
-    resp = make_response(render_template('index.html', 
-                                         logged_in=True,
-                                         username=username,
-                                         problems=problems,
-                                         time_remaining=time_remaining,
-                                         is_contest_over=is_contest_over,
-                                         submissions=user_subs))
-    resp.headers['Content-Type'] = 'text/html'
-    return resp
-
-@app.route('/leaderboard')
-def leaderboard():
-    if 'username' not in session: return redirect(url_for('index'))
+@app.route('/contest/<contest_id>/standings')
+def contest_standings(contest_id):
+    contest = contest_manager.get_contest(contest_id)
+    if not contest: abort(404)
     
     all_users = list(user_manager.users.keys())
-    board = contest_manager.get_leaderboard(all_users)
-    problems = problem_manager.get_all_problems()
+    board = contest_manager.get_leaderboard(contest_id, all_users, user_manager)
+    problems = problem_manager.get_contest_problems(contest_id)
     
-    return render_template('leaderboard.html', leaderboard=board, problems=problems)
+    return render_template('standings.html', contest=contest, leaderboard=board, problems=problems)
 
-@app.route('/problem/<problem_id>/pdf')
-def view_pdf(problem_id):
+@app.route('/problem/<contest_id>/<problem_id>/pdf')
+def view_pdf(contest_id, problem_id):
     if 'username' not in session: return abort(403)
     
-    problem = problem_manager.get_problem(problem_id)
+    problem = problem_manager.get_problem(contest_id, problem_id)
     if not problem or not problem.has_pdf:
         abort(404)
         
     return send_from_directory(problem.problem_dir, "statement.pdf")
 
-@app.route('/problem/<problem_id>/editorial')
-def view_editorial(problem_id):
+@app.route('/problem/<contest_id>/<problem_id>/editorial')
+def view_editorial(contest_id, problem_id):
     if 'username' not in session: return abort(403)
 
-    if not contest_manager.is_over():
+    if not contest_manager.is_over(contest_id):
         return "Contest is still active! Editorials are hidden.", 403
 
-    problem = problem_manager.get_problem(problem_id)
+    problem = problem_manager.get_problem(contest_id, problem_id)
     if not problem or not problem.has_editorial:
         abort(404)
         
@@ -187,32 +207,134 @@ def view_editorial(problem_id):
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    if 'username' not in session:
-        return redirect(url_for('index'))
+    if 'username' not in session: return redirect(url_for('index'))
     
-    if 'code_file' not in request.files: return "No file uploaded"
-    
-    file = request.files['code_file']
+    contest_id = request.form.get('contest_id')
     problem_id = request.form.get('problem_id')
+    file = request.files.get('code_file')
     
-    if file.filename == '': return "No selected file"
+    if not file or file.filename == '': return "No selected file"
     
-    if file:
-        filepath = os.path.join(UPLOAD_FOLDER, f"submit_{session['username']}_{problem_id}.cpp")
-        file.save(filepath)
-        
-        problem = problem_manager.get_problem(problem_id)
-        if not problem:
-             return "Invalid problem", 400
-        
-        result = validator.judge_submission(filepath, problem_id, max_points=problem.points)
-        
-        contest_manager.save_submission(session['username'], problem_id, result['verdict'], result['score'])
-        
-        resp = make_response(render_template('result.html', result=result, problem_id=problem_id))
-        resp.headers['Content-Type'] = 'text/html'
-        return resp
+    contest = contest_manager.get_contest(contest_id)
+    if not contest: return "Invalid contest", 400
+    
+    # Check if contest is running or if we allow practice
+    # For now, allow always, but maybe mark differently?
+    
+    filepath = os.path.join(UPLOAD_FOLDER, f"submit_{session['username']}_{contest_id}_{problem_id}.cpp")
+    file.save(filepath)
+    
+    problem = problem_manager.get_problem(contest_id, problem_id)
+    if not problem: return "Invalid problem", 400
+    
+    result = validator.judge_submission(filepath, contest_id, problem_id, max_points=problem.points)
+    
+    contest_manager.save_submission(session['username'], contest_id, problem_id, result['verdict'], result['score'])
+    
+    return render_template('result.html', result=result, problem_id=problem_id, contest_id=contest_id)
+
+@app.route('/rankings')
+def rankings():
+    users_data = []
+    for u, data in user_manager.users.items():
+        users_data.append({
+            'username': u, 
+            'rating': data.get('rating', 0),
+            'gender': data.get('gender', 'Male')
+        })
+    users_data.sort(key=lambda x: x['rating'], reverse=True)
+    return render_template('rankings.html', rankings=users_data)
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.form.get('username')
+    password = request.form.get('password')
+    if user_manager.validate_login(username, password):
+        session['username'] = username
+        return redirect(url_for('index'))
+    return "Invalid Username or Password. <a href='/'>Try Again</a>"
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('index'))
+
+# --- ADMIN ROUTES ---
+
+@app.route('/admin')
+@admin_required
+def admin_dashboard():
+    user_manager = UserManager() # Reload
+    contest_manager = ContestManager() # Reload
+    users = user_manager.users
+    contests = contest_manager.get_all_contests()
+    
+    return render_template('admin.html', 
+                           users=users, 
+                           contests=contests,
+                           current_time=time.time(),
+                           current_user=session['username'],
+                           msg=request.args.get('msg'),
+                           msg_type=request.args.get('msg_type'))
+
+@app.route('/admin/create_contest', methods=['POST'])
+@admin_required
+def create_contest():
+    name = request.form.get('name')
+    start_time = request.form.get('start_time')
+    end_time = request.form.get('end_time')
+    
+    try:
+        cid = contest_manager.create_contest(name, start_time, end_time)
+        # Create directory
+        os.makedirs(os.path.join('problems', cid), exist_ok=True)
+        return redirect(url_for('admin_dashboard', msg=f"Contest {cid} created!", msg_type="success"))
+    except Exception as e:
+        return redirect(url_for('admin_dashboard', msg=f"Error: {e}", msg_type="error"))
+
+@app.route('/admin/calculate_ratings', methods=['POST'])
+@admin_required
+def calculate_ratings():
+    contest_id = request.form.get('contest_id')
+    contest_manager.update_ratings(user_manager, contest_id)
+    return redirect(url_for('admin_dashboard', msg=f"Ratings updated for Contest {contest_id}", msg_type="success"))
+
+# Keep other admin routes (update_rating, add_user, delete_user) similar to before...
+@app.route('/admin/update_rating', methods=['POST'])
+@admin_required
+def update_rating():
+    username = request.form.get('username')
+    try: new_rating = int(request.form.get('rating'))
+    except: return redirect(url_for('admin_dashboard', msg="Invalid rating", msg_type="error"))
+    
+    if username in user_manager.users:
+        user_manager.users[username]['rating'] = new_rating
+        with open(user_manager.users_file, 'w') as f: json.dump(user_manager.users, f, indent=4)
+        return redirect(url_for('admin_dashboard', msg="Rating updated", msg_type="success"))
+    return redirect(url_for('admin_dashboard', msg="User not found", msg_type="error"))
+
+@app.route('/admin/add_user', methods=['POST'])
+@admin_required
+def add_user():
+    u = request.form.get('username')
+    p = request.form.get('password')
+    g = request.form.get('gender')
+    is_admin = request.form.get('is_admin') == 'on'
+    if u in user_manager.users: return redirect(url_for('admin_dashboard', msg="User exists", msg_type="error"))
+    user_manager.users[u] = {'password': p, 'rating': 1500, 'is_admin': is_admin, 'gender': g}
+    with open(user_manager.users_file, 'w') as f: json.dump(user_manager.users, f, indent=4)
+    return redirect(url_for('admin_dashboard', msg="User added", msg_type="success"))
+
+@app.route('/admin/delete_user', methods=['POST'])
+@admin_required
+def delete_user():
+    u = request.form.get('username')
+    if u == session['username']: return redirect(url_for('admin_dashboard', msg="Cannot delete self", msg_type="error"))
+    if u in user_manager.users:
+        del user_manager.users[u]
+        with open(user_manager.users_file, 'w') as f: json.dump(user_manager.users, f, indent=4)
+    return redirect(url_for('admin_dashboard', msg="User deleted", msg_type="success"))
 
 if __name__ == '__main__':
-    print(f"Contest started! Ends at timestamp: {contest_manager.end_time}")
+    print("Contest Platform Started")
     app.run(debug=True, port=5000)

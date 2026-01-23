@@ -1,0 +1,111 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\geometry{letterpaper, margin=1in}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\title{\textbf{Editorial: Problem A - Ship Wars}}
+\author{Setter: Hudson}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Problem Overview}
+We are given $N$ entries, each consisting of a fandom name (``Bocchi'' or ``OshiNoKo'') and an associated score. We need to calculate the total score for each fandom and determine which one is strictly greater, or if they are tied.
+
+\section*{Solution}
+This is a straightforward implementation problem. We need to maintain two integer variables, say \texttt{total\_bocchi} and \texttt{total\_onk}, both initialized to 0.
+
+We iterate through the input $N$ times. In each iteration, we read a string $F$ and an integer $S$.
+\begin{itemize}
+    \item If the string $F$ is ``Bocchi'', we add $S$ to \texttt{total\_bocchi}.
+    \item Otherwise (if $F$ is ``OshiNoKo''), we add $S$ to \texttt{total\_onk}.
+\end{itemize}
+
+After processing all inputs, we compare the two totals:
+\begin{itemize}
+    \item If $\texttt{total\_bocchi} > \texttt{total\_onk}$, print ``Bocchi''.
+    \item If $\texttt{total\_onk} > \texttt{total\_bocchi}$, print ``OshiNoKo''.
+    \item If they are equal, print ``Tie''.
+\end{itemize}
+
+\section*{Complexity Analysis}
+\begin{itemize}
+    \item \textbf{Time Complexity:} $O(N)$ because we iterate through the list of ships exactly once.
+    \item \textbf{Space Complexity:} $O(1)$ (or $O(L)$ where $L$ is the max string length) as we only store a few variables and the current input string.
+\end{itemize}
+
+\section*{Implementation (C++)}
+
+\begin{lstlisting}[language=C++]
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+int main() {
+    int N;
+    if (!(cin >> N)) return 0;
+
+    long long bocchi_score = 0;
+    long long onk_score = 0;
+
+    for (int i = 0; i < N; ++i) {
+        string fandom;
+        int score;
+        cin >> fandom >> score;
+
+        if (fandom == "Bocchi") {
+            bocchi_score += score;
+        } else {
+            onk_score += score;
+        }
+    }
+
+    if (bocchi_score > onk_score) {
+        cout << "Bocchi" << endl;
+    } else if (onk_score > bocchi_score) {
+        cout << "OshiNoKo" << endl;
+    } else {
+        cout << "Tie" << endl;
+    }
+
+    return 0;
+}
+\end{lstlisting}
+
+\end{document}

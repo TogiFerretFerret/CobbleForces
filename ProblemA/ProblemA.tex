@@ -1,0 +1,105 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{hyperref}
+
+\geometry{letterpaper, margin=1in}
+
+\title{\textbf{Problem A: Ship Wars}}
+\date{}
+\author{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Description}
+
+Hudson, Wiley, and Jayden are engaged in a heated debate about which anime has better relationships (``ships''): \textit{Bocchi the Rock!} or \textit{Oshi no Ko}. Unable to come to a consensus through discussion alone, they decide to settle the matter with a vote.
+
+They have compiled a list of $N$ potential ships. For each ship, they have assigned a numerical score $S_i$ representing its quality (based on chemistry, lore, and fanart potential). Each ship belongs to exactly one fandom: either ``Bocchi'' or ``OshiNoKo''.
+
+Your task is to help them calculate the total score for each fandom and determine the winner.
+
+\begin{itemize}
+    \item If the total score for ``Bocchi'' is strictly greater than the total score for ``OshiNoKo'', the winner is \textbf{Bocchi}.
+    \item If the total score for ``OshiNoKo'' is strictly greater than the total score for ``Bocchi'', the winner is \textbf{OshiNoKo}.
+    \item If the total scores are equal, the result is a \textbf{Tie}.
+\end{itemize}
+
+\section*{Input}
+
+The first line contains a single integer $N$ ($1 \le N \le 1000$), the number of ships.
+
+The next $N$ lines each describe a ship. Each line contains:
+\begin{enumerate}
+    \item A string $F_i$ representing the fandom, which is either ``Bocchi'' or ``OshiNoKo''.
+    \item An integer $S_i$ ($1 \le S_i \le 100$), the score assigned to that ship.
+\end{enumerate}
+
+\section*{Output}
+
+Output a single line containing the result:
+\begin{itemize}
+    \item ``Bocchi'' if the Bocchi fandom wins.
+    \item ``OshiNoKo'' if the Oshi no Ko fandom wins.
+    \item ``Tie'' if the total scores are equal.
+\end{itemize}
+
+\section*{Examples}
+
+\subsection*{Example 1}
+\textbf{Input:}
+\begin{verbatim}
+3
+Bocchi 10
+OshiNoKo 8
+Bocchi 5
+\end{verbatim}
+
+\textbf{Output:}
+\begin{verbatim}
+Bocchi
+\end{verbatim}
+
+\textbf{Explanation:} \\
+Total score for Bocchi: $10 + 5 = 15$. \\
+Total score for OshiNoKo: $8$. \\
+$15 > 8$, so Bocchi wins.
+
+\subsection*{Example 2}
+\textbf{Input:}
+\begin{verbatim}
+2
+Bocchi 50
+OshiNoKo 60
+\end{verbatim}
+
+\textbf{Output:}
+\begin{verbatim}
+OshiNoKo
+\end{verbatim}
+
+\textbf{Explanation:} \\
+Total score for Bocchi: $50$. \\
+Total score for OshiNoKo: $60$. \\
+$60 > 50$, so OshiNoKo wins.
+
+\subsection*{Example 3}
+\textbf{Input:}
+\begin{verbatim}
+2
+Bocchi 100
+OshiNoKo 100
+\end{verbatim}
+
+\textbf{Output:}
+\begin{verbatim}
+Tie
+\end{verbatim}
+
+\end{document}

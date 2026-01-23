@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Contests - CobbleForces{% endblock %}
+
+{% block content %}
+<div class="col-12">
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <h3 class="text-primary mb-4">Contests</h3>
+            
+            <table class="table table-bordered table-cf table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 60%">Name</th>
+                        <th style="width: 20%">Start Time</th>
+                        <th style="width: 10%">Length</th>
+                        <th style="width: 10%">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in contests %}
+                    <tr>
+                        <td class="user-cell">
+                            <a href="/contest/{{ c.id }}" class="text-decoration-none" style="font-size: 1.1em; color: #3b5998;">
+                                {{ c.name }}
+                            </a>
+                        </td>
+                        <td class="text-center">{{ c.start_time | datetime }}</td>
+                        <td class="text-center">
+                            {{ ((c.end_time - c.start_time) / 3600) | round(1) }}h
+                        </td>
+                        <td class="text-center">
+                            {% if now < c.start_time %}
+                                <span class="text-muted">Before</span>
+                            {% elif now > c.end_time %}
+                                <span class="text-danger fw-bold">Final Standings</span>
+                            {% else %}
+                                <span class="text-success fw-bold">Running</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            {% if not logged_in %}
+            <div class="mt-5 text-center p-4 bg-light rounded">
+                <h5>Enter the Arena</h5>
+                <p>Login to participate in contests.</p>
+                <form action="/login" method="post" class="d-inline-block text-start" style="max-width: 300px;">
+                    <input type="text" name="username" class="form-control mb-2" placeholder="Handle" required>
+                    <input type="password" name="password" class="form-control mb-2" placeholder="Password" required>
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

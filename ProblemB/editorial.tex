@@ -1,0 +1,144 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\geometry{letterpaper, margin=1in}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\title{\textbf{Editorial: Problem B - The 727 Jumpscare}}
+\author{Setter: Hudson}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Problem Overview}
+We are given a string $S$ consisting of digits. We need to find the number of subsequences "727". That is, the number of index triples $(i, j, k)$ such that $1 \le i < j < k \le |S|$ and $S[i] = '7', S[j] = '2', S[k] = '7'$.
+
+\section*{Naive Solution}
+A brute-force approach would be to iterate through all possible triples $(i, j, k)$ and check the condition.
+This would require three nested loops:
+\begin{lstlisting}[language=C++]
+long long count = 0;
+int n = s.length();
+for (int i = 0; i < n; i++) {
+    for (int j = i + 1; j < n; j++) {
+        for (int k = j + 1; k < n; k++) {
+            if (s[i] == '7' && s[j] == '2' && s[k] == '7') {
+                count++;
+            }
+        }
+    }
+}
+\end{lstlisting}
+The time complexity is $O(N^3)$. With $|S| \le 5000$, $N^3 \approx 1.25 \times 10^{11}$ operations, which exceeds the operation limit for 1.0 second ($\approx 10^8$ operations). This solution will result in Time Limit Exceeded (TLE).
+
+\section*{Optimal Solution (Dynamic Programming)}
+We can solve this in a single pass $O(N)$ by keeping track of partial subsequences. The problem asks us to build "727". This is built in steps: "7" $\rightarrow$ "72" $\rightarrow$ "727".
+
+Let's maintain three counters as we iterate through the string from left to right:
+\begin{itemize}
+    \item \texttt{cnt7}: The number of '7's seen so far.
+    \item \texttt{cnt72}: The number of "72" subsequences seen so far.
+    \item \texttt{total}: The number of "727" subsequences seen so far (our answer).
+\end{itemize}
+
+\textbf{Logic:}
+\begin{enumerate}
+    \item When we encounter a \textbf{'2'}:
+    It can combine with any of the previous \texttt{cnt7} '7's to form a "72".
+    So, we update: $\texttt{cnt72} = \texttt{cnt72} + \texttt{cnt7}$.
+    
+    \item When we encounter a \textbf{'7'}:
+    This digit plays two roles.
+    \begin{itemize}
+        \item First, it can act as the \textit{last} digit ($k$) in a "727" subsequence. It completes any existing "72" subsequences found previously. So, we add the current number of "72"s to our answer: $\texttt{total} = \texttt{total} + \texttt{cnt72}$.
+        \item Second, it can act as the \textit{first} digit ($i$) in a future "727" subsequence. So, we increment the count of single '7's: $\texttt{cnt7} = \texttt{cnt7} + 1$.
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Implementation Note:} When encountering a '7', the order of updates is crucial. We must update \texttt{total} before incrementing \texttt{cnt7}. If we incremented \texttt{cnt7} first, we would imply that a '7' could form a "72" with a future '2' and then complete it itself, which violates the strict index ordering $i < j < k$.
+
+\section*{Complexity Analysis}
+\begin{itemize}
+    \item \textbf{Time Complexity:} $O(N)$, where $N$ is the length of the string. We iterate through the string exactly once.
+    \item \textbf{Space Complexity:} $O(1)$, as we only use three integer variables regardless of input size.
+\end{itemize}
+
+\section*{Implementation (C++)}
+
+\begin{lstlisting}[language=C++]
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+void solve() {
+    string s;
+    cin >> s;
+    
+    long long cnt7 = 0;
+    long long cnt72 = 0;
+    long long total = 0;
+    
+    for (char c : s) {
+        if (c == '7') {
+            // 1. This '7' acts as the 3rd digit, completing "72..."
+            total += cnt72;
+            
+            // 2. This '7' acts as the 1st digit for future sequences
+            cnt7++;
+        } else if (c == '2') {
+            // This '2' acts as the 2nd digit, extending "7..."
+            cnt72 += cnt7;
+        }
+    }
+    
+    cout << total << endl;
+}
+
+int main() {
+    // Optimization for faster I/O
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    int N;
+    if (cin >> N) {
+        while (N--) {
+            solve();
+        }
+    }
+    return 0;
+}
+\end{lstlisting}
+
+\end{document}

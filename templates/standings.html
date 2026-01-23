@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Standings - {{ contest.name }}{% endblock %}
+
+{% block content %}
+<div class="col-12 mb-3">
+    <h3><a href="/contest/{{ contest.id }}" class="text-decoration-none text-muted">{{ contest.name }}</a> / Standings</h3>
+</div>
+
+<div class="col-12">
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            
+            <div class="table-responsive">
+                <table class="table table-bordered table-cf table-hover table-striped">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="rank-cell">#</th>
+                            <th class="user-cell">Who</th>
+                            <th>=</th>
+                            {% for p in problems %}
+                            <th style="width: 60px;">{{ p.id }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in leaderboard %}
+                        <tr {% if entry.username == current_user %}class="table-info"{% endif %}>
+                            <td class="text-center">{{ loop.index }}</td>
+                            <td class="user-cell">
+                                {{ entry.username | handle(entry.rating) }}
+                            </td>
+                            <td class="text-center fw-bold text-primary">{{ entry.total_score }}</td>
+                            
+                            {% for p in problems %}
+                                {% set score = entry.breakdown.get(p.id, 0) %}
+                                <td class="text-center">
+                                    {% if score > 0 %}
+                                        <span class="text-success fw-bold">+{{ score | int }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

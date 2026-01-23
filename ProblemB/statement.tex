@@ -1,0 +1,81 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{hyperref}
+
+\geometry{letterpaper, margin=1in}
+
+\title{\textbf{Problem B: The 727 Jumpscare}}
+\author{Time Limit: 1.0s | Memory Limit: 256MB}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Description}
+
+Ethan is an avid player of the rhythm game \textit{osu!}. Like many players in the community, he has developed a specific neurosis: seeing the number \textbf{727} anywhere causes him immense psychological distress.
+
+Ethan has a list of $N$ strings representing data dumps from his recent plays. However, the brainrot has advanced significantly. He no longer just sees the number "727" when the digits are right next to each other. He now sees it hidden inside other numbers!
+
+Ethan sees a "jumpscare" whenever he can find the digits \textbf{7}, \textbf{2}, and \textbf{7} appearing in that order within a string, even if they are separated by other digits.
+
+Formally, for a string $S$, you need to count the number of triples of indices $(i, j, k)$ such that:
+\[ 1 \le i < j < k \le |S| \]
+\[ S[i] = '7', \quad S[j] = '2', \quad S[k] = '7' \]
+
+Calculate the total number of such "727" subsequences in each string given.
+
+\section*{Input}
+
+The first line contains a single integer $N$ ($1 \le N \le 20$), the number of test strings.
+
+The next $N$ lines each contain a string $S$ consisting of digits ($1 \le |S| \le 5000$).
+
+\section*{Output}
+
+For each string, output a single line containing the number of "727" subsequences.
+
+\section*{Examples}
+
+\subsection*{Example 1}
+\textbf{Input:}
+\begin{verbatim}
+3
+727
+7277
+7227
+\end{verbatim}
+
+\textbf{Output:}
+\begin{verbatim}
+1
+2
+2
+\end{verbatim}
+
+\textbf{Explanation:} \\
+\begin{itemize}
+    \item \textbf{727}: One occurrence (indices 1, 2, 3).
+    \item \textbf{7277}: The first '7' and '2' can combine with either the third '7' or the fourth '7'. Total = 2.
+    \item \textbf{7227}: The first '7' and the last '7' can combine with either of the '2's in the middle. Total = 2.
+\end{itemize}
+
+\subsection*{Example 2}
+\textbf{Input:}
+\begin{verbatim}
+1
+12345
+\end{verbatim}
+
+\textbf{Output:}
+\begin{verbatim}
+0
+\end{verbatim}
+
+\end{document}
