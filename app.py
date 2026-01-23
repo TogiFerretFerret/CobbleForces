@@ -292,6 +292,28 @@ def create_contest():
     except Exception as e:
         return redirect(url_for('admin_dashboard', msg=f"Error: {e}", msg_type="error"))
 
+@app.route('/admin/edit_contest/<contest_id>', methods=['GET', 'POST'])
+@admin_required
+def edit_contest(contest_id):
+    contest = contest_manager.get_contest(contest_id)
+    if not contest: abort(404)
+    
+    if request.method == 'POST':
+        name = request.form.get('name')
+        start = request.form.get('start_time')
+        end = request.form.get('end_time')
+        
+        try:
+            contest_manager.contests[contest_id]['name'] = name
+            contest_manager.contests[contest_id]['start_time'] = float(start)
+            contest_manager.contests[contest_id]['end_time'] = float(end)
+            contest_manager.save_contests()
+            return redirect(url_for('admin_dashboard', msg="Contest updated", msg_type="success"))
+        except Exception as e:
+            return redirect(url_for('admin_dashboard', msg=f"Error: {e}", msg_type="error"))
+            
+    return render_template('edit_contest.html', contest=contest)
+
 @app.route('/admin/calculate_ratings', methods=['POST'])
 @admin_required
 def calculate_ratings():

@@ -55,7 +55,10 @@
                     <div class="list-group-item">
                         <div class="d-flex w-100 justify-content-between">
                             <h6 class="mb-1">{{ c.name }} (ID: {{ c.id }})</h6>
-                            <small>{{ c.start_time | datetime }}</small>
+                            <div>
+                                <a href="/admin/edit_contest/{{ c.id }}" class="btn btn-sm btn-outline-primary me-1">✏️ Edit</a>
+                                <small>{{ c.start_time | datetime }}</small>
+                            </div>
                         </div>
                         <form action="/admin/calculate_ratings" method="post" class="mt-2" onsubmit="return confirm('Update ratings for {{ c.name }}?');">
                             <input type="hidden" name="contest_id" value="{{ c.id }}">
