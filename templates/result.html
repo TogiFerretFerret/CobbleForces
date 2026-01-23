@@ -86,6 +86,9 @@
             if (data.status === 'Judging' && data.verdict === 'AC') {
                 document.getElementById('verdict-display').innerText = `Running on test ${data.current_test || '...'}`;
                 document.getElementById('verdict-display').className = `display-1 text-muted mb-3`;
+            } else if (data.verdict === 'Compiling') {
+                document.getElementById('verdict-display').innerText = `Compiling...`;
+                document.getElementById('verdict-display').className = `display-1 text-muted mb-3`;
             } else {
                 document.getElementById('verdict-display').innerText = data.verdict;
                 document.getElementById('verdict-display').className = `display-1 verdict-${data.verdict} mb-3`;

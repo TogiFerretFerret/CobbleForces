@@ -8,13 +8,24 @@ class Validator:
     def __init__(self):
         pass
     
-    def _set_limits(self):
-        # 2 seconds CPU time
-        resource.setrlimit(resource.RLIMIT_CPU, (2, 3))
+    def _set_limits(self, cpu_seconds):
+        # CPU time limit
+        soft = int(cpu_seconds)
+        hard = int(cpu_seconds) + 1
+        resource.setrlimit(resource.RLIMIT_CPU, (soft, hard))
         # 512MB Memory
         resource.setrlimit(resource.RLIMIT_AS, (512 * 1024 * 1024, 512 * 1024 * 1024))
 
-    def judge_submission(self, source_path, contest_id, problem_id, max_points=100, on_test_complete=None):
+    def judge_submission(self, source_path, contest_id, problem_id, max_points=100, on_test_complete=None, time_limit=2.0):
+        if on_test_complete:
+            on_test_complete({
+                "verdict": "Compiling",
+                "score": 0,
+                "max_points": max_points,
+                "tests": [],
+                "status": "Judging"
+            })
+
         # 1. Compile
         exe_path = source_path + ".exe"
         compile_cmd = ["g++", "-O2", "-o", exe_path, source_path]
@@ -39,7 +50,7 @@ class Validator:
                 "verdict": "IE",
                 "score": 0,
                 "max_points": max_points,
-                "details": "Problem directory not found.",
+                "details": f"Problem directory not found: {problem_dir}",
                 "tests": []
             }
              if on_test_complete: on_test_complete(res)
@@ -88,8 +99,8 @@ class Validator:
                     input=input_data, 
                     capture_output=True, 
                     text=True, 
-                    timeout=2.0,
-                    preexec_fn=self._set_limits
+                    timeout=time_limit,
+                    preexec_fn=lambda: self._set_limits(time_limit)
                 )
                 exec_time = int((time.time() - start_exec) * 1000)
                 actual_output = proc.stdout.strip()

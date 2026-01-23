@@ -12,14 +12,15 @@ class SubmissionQueue:
         self.worker_thread.start()
         self.results = {} # sub_id -> result
 
-    def add_submission(self, sub_id, username, source_path, contest_id, problem_id):
+    def add_submission(self, sub_id, username, source_path, contest_id, problem_id, time_limit=2.0):
         self.results[sub_id] = {'status': 'Queued', 'verdict': 'In Queue'}
         self.queue.put({
             'sub_id': sub_id,
             'username': username,
             'source_path': source_path,
             'contest_id': contest_id,
-            'problem_id': problem_id
+            'problem_id': problem_id,
+            'time_limit': time_limit
         })
 
     def _worker(self):
@@ -29,7 +30,7 @@ class SubmissionQueue:
             
             sub_id = task['sub_id']
             self.results[sub_id]['status'] = 'Judging'
-            self.results[sub_id]['verdict'] = 'Judging'
+            self.results[sub_id]['verdict'] = 'Starting'
             self.results[sub_id]['tests'] = []
             
             def update_progress(partial_result):
@@ -41,10 +42,16 @@ class SubmissionQueue:
                     task['contest_id'], 
                     task['problem_id'], 
                     max_points=100,
-                    on_test_complete=update_progress
+                    on_test_complete=update_progress,
+                    time_limit=task.get('time_limit', 2.0)
                 )
                 
-                # Update in file
+                # Save full result to a dedicated file
+                res_path = os.path.join('submissions', f'result_{sub_id}.json')
+                with open(res_path, 'w') as f:
+                    json.dump(result, f, indent=4)
+
+                # Update summary in contest_data.json
                 data = self.contest_manager._load_data()
                 user_subs = data.get(task['username'], [])
                 for s in user_subs:

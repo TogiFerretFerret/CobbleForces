@@ -1,6 +1,15 @@
 {
     "Riverxia": [
-        ],
+        {
+            "id": 1,
+            "time": "09:11:30",
+            "timestamp": 1769177490.3191035,
+            "contest_id": "1",
+            "problem": "G",
+            "verdict": "Judging",
+            "score": 0
+        }
+    ],
     "Wiley": [],
     "Jayden": [],
     "Ethan": [],

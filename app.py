@@ -275,7 +275,7 @@ def submit():
     sub_id = contest_manager.save_submission(session['username'], contest_id, problem_id, 'Judging', 0)
     
     # Add to background queue
-    submission_queue.add_submission(sub_id, session['username'], filepath, contest_id, problem_id)
+    submission_queue.add_submission(sub_id, session['username'], filepath, contest_id, problem_id, time_limit=problem.time_limit)
     
     return redirect(url_for('view_submission', sub_id=sub_id))
 
@@ -289,14 +289,20 @@ def view_submission(sub_id):
     
     result = submission_queue.get_result(sub_id)
     if not result:
-        # If not in active memory queue, check the file data (it might have finished long ago)
-        data = contest_manager._load_data()
-        user_subs = data.get(session['username'], [])
-        for s in user_subs:
-            if s.get('id') == sub_id:
-                result = s
-                result['status'] = 'Finished'
-                break
+        # Check for saved detailed result file
+        res_path = os.path.join(UPLOAD_FOLDER, f'result_{sub_id}.json')
+        if os.path.exists(res_path):
+            with open(res_path, 'r') as f:
+                result = json.load(f)
+        else:
+            # Fallback to summary in contest_data.json
+            data = contest_manager._load_data()
+            user_subs = data.get(session['username'], [])
+            for s in user_subs:
+                if s.get('id') == sub_id:
+                    result = s
+                    result['status'] = 'Finished'
+                    break
     
     if not result: abort(404)
     

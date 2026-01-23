@@ -7,6 +7,7 @@ class Problem:
         self.contest_id = contest_id
         self.problem_dir = problem_dir
         self.rating = 800 # Default
+        self.time_limit = 2.0 # Default in seconds
         
         # Load from metadata if exists
         info_path = os.path.join(problem_dir, 'problem_info.json')
@@ -15,6 +16,17 @@ class Problem:
                 with open(info_path, 'r') as f:
                     info = json.load(f)
                     self.rating = info.get('rating', 800)
+                    
+                    tl = info.get('time_limit', '2.0')
+                    if isinstance(tl, str):
+                        if tl.endswith('ms'):
+                            self.time_limit = float(tl[:-2]) / 1000.0
+                        elif tl.endswith('s'):
+                            self.time_limit = float(tl[:-1])
+                        else:
+                            self.time_limit = float(tl)
+                    else:
+                        self.time_limit = float(tl)
             except:
                 pass
 
