@@ -48,8 +48,7 @@ def format_handle(username, rating=None):
         
     cls = "user-lurker"
     if r < 400: cls = "user-lurker"
-    elif r < 800: cls = "user-newbie"
-    elif r < 1200: cls = "user-beginner"
+    elif r < 1200: cls = "user-newbie"
     elif r < 1400: cls = "user-pupil"
     elif r < 1600: cls = "user-specialist"
     elif r < 1900: cls = "user-expert"
@@ -73,7 +72,7 @@ def format_handle(username, rating=None):
             formatted_name += f'<span style="color: {color}; font-weight: bold;">{char}</span>'
         return Markup(f'<span class="user-yuri" style="font-weight: bold;">{formatted_name}</span>')
 
-    # Yaoi Case (Black + Purple + Glow) 3800 <= r < 4000
+    # Fudanshi/Fujoshi (Yaoi) Case (Black + Purple + Glow) 3800 <= r < 4000
     if r >= 3800 and r < 4000:
         first = username[0]
         rest = username[1:]
@@ -83,11 +82,11 @@ def format_handle(username, rating=None):
     if r >= 3500 and r < 3800:
         return Markup(f'<span class="user-hime">{username}</span>')
 
-    # Nutella-style (LGM)
+    # Legendary Grandmaster (Black First Letter)
     if (r >= 2500 and r < 3000):
         first = username[0]
         rest = username[1:]
-        return Markup(f'<span class="{cls}"><span class="legendary-first">{first}</span>{rest}</span>')
+        return Markup(f'<span class="user-grandmaster"><span class="legendary-first">{first}</span>{rest}</span>')
     
     return Markup(f'<span class="{cls}">{username}</span>')
 
@@ -108,16 +107,14 @@ def get_rank_name(rating, gender='Male'):
     
     if gender not in ['Male', 'Female']: gender = 'Male'
     
-    if r < 400: return "Lurker"
-    elif r < 800: return "Newbie"
-    elif r < 1200: return "Beginner"
+    if r < 1200: return "Newbie"
     elif r < 1400: return "Pupil"
     elif r < 1600: return "Specialist"
     elif r < 1900: return "Expert"
     elif r < 2100: return "Candidate Master"
     elif r < 2300: return "Master"
     elif r < 2400: return "International Master"
-    elif r < 2500: return "Grandmaster"
+    elif r < 2600: return "Grandmaster"
     elif r < 3000: return "Legendary Grandmaster"
     elif r < 3200: return "Protagonist"
     elif r < 3500: return "Otaku"

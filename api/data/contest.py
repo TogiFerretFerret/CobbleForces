@@ -247,14 +247,16 @@ class ContestManager:
         return leaderboard
 
     def update_ratings(self, user_manager, contest_id):
-        # Get participants
+        # 1. Get Leaderboard & Participants
         users = list(user_manager.users.keys())
         leaderboard = self.get_leaderboard(contest_id, users, user_manager)
         
-        if not leaderboard: return # No participants
+        if not leaderboard: return 
         
-        # Rank by solved (desc) then penalty (asc)
+        # Sort by rank: solved (desc), penalty (asc)
         leaderboard.sort(key=lambda x: (-x['total_solved'], x['total_penalty']))
+        
+        # Assign Ranks
         for i, entry in enumerate(leaderboard):
             if i > 0 and leaderboard[i]['total_solved'] == leaderboard[i-1]['total_solved'] and leaderboard[i]['total_penalty'] == leaderboard[i-1]['total_penalty']:
                 entry['actual_rank'] = leaderboard[i-1]['actual_rank']
@@ -262,22 +264,37 @@ class ContestManager:
                 entry['actual_rank'] = i + 1
 
         participants = leaderboard
-        num_participants = len(participants)
         
+        # 2. Prepare Data for Algo
+        # Identify Problems (sorted to map to Difficulty Curve)
+        # We need all unique problem IDs encountered in this contest to map them to indices 0..6
+        all_problem_ids = set()
+        for entry in participants:
+            for pid in entry['breakdown'].keys():
+                all_problem_ids.add(pid)
+        sorted_problem_ids = sorted(list(all_problem_ids)) # A, B, C...
+        
+        problem_ratings = [800, 1000, 1100, 1700, 2500, 3100, 3500]
+
+        # Elo Helpers
         def get_elo_win_probability(ra, rb):
-            return 1 / (1 + 10 ** ((rb - ra) / 400))
+            return 1.0 / (1.0 + 10.0 ** ((rb - ra) / 400.0))
 
         def get_seed(rating, exclude_user=None):
             seed = 1.0
             for opponent in participants:
                 if opponent['username'] == exclude_user: continue
-                seed += get_elo_win_probability(opponent['rating'], rating)
+                # Use current effective rating for seed calc
+                # (For idempotency, we must use the rating *before* this contest if already rated, 
+                # but we handle that by reverting first in the main loop)
+                opp_r = opponent.get('effective_rating', opponent['rating'])
+                seed += get_elo_win_probability(opp_r, rating)
             return seed
 
         def find_performance_rating(actual_rank, exclude_user):
             low = 0
             high = 8000
-            for _ in range(100):
+            for _ in range(60):
                 mid = (low + high) / 2
                 if get_seed(mid, exclude_user) < actual_rank:
                     high = mid
@@ -285,64 +302,84 @@ class ContestManager:
                     low = mid
             return mid
 
-        # Get all contests sorted by time to check streaks
-        all_contests = self.get_all_contests()
-        all_contests.sort(key=lambda x: x['start_time'])
-        contest_ids_sorted = [c['id'] for c in all_contests]
-        
-        try:
-            current_idx = contest_ids_sorted.index(str(contest_id))
-            last_3_ids = contest_ids_sorted[max(0, current_idx-2):current_idx+1]
-        except:
-            last_3_ids = [str(contest_id)]
-
-        new_ratings = {}
+        # 3. Idempotency Pre-flight
+        # We need to temporarily revert ratings for users who have already been rated for this contest
+        # to calculate the correct 'Seed' and 'Performance'.
         for entry in participants:
             user = entry['username']
-            current_rating = entry['rating']
+            rated_hist = user_manager.get_rated_participations(user)
+            current_r = entry['rating']
+            
+            if str(contest_id) in rated_hist:
+                old_delta = rated_hist[str(contest_id)]
+                entry['effective_rating'] = current_r - old_delta
+            else:
+                entry['effective_rating'] = current_r
+
+        # 4. Calculate New Ratings
+        updates = {} # user -> (delta, new_rating)
+
+        for entry in participants:
+            user = entry['username']
+            effective_rating = entry['effective_rating'] # Rating BEFORE this contest
             actual_rank = entry['actual_rank']
             
-            performance_rating = find_performance_rating(actual_rank, user)
+            # Step 1: Base Performance
+            perf_rating = find_performance_rating(actual_rank, user)
             
-            participation_count = user_manager.get_participation_count(user)
-            k = 0.5 if participation_count <= 10 else 0.2
-            if performance_rating < current_rating:
-                k /= 2
+            # Step 2: Boss Slayer Floor
+            solved_indices = []
+            for pid, info in entry['breakdown'].items():
+                if info['solved']:
+                    try:
+                        # Map Letter to Index (A=0, B=1, ..., G=6)
+                        # Assumes PID starts with a letter
+                        idx = ord(pid.upper()[0]) - ord('A')
+                        if 0 <= idx < len(problem_ratings):
+                            solved_indices.append(idx)
+                    except:
+                        pass
             
-            raw_change = k * (performance_rating - current_rating)
-            
-            bonus = 0
-            if current_rating < 1200 and entry['total_solved'] > 0:
-                bonus += 5
-            
-            # Speedster bonus
-            if entry['is_speedster']:
-                bonus += 2
-            
-            participated_in_last_3 = True
-            if len(last_3_ids) < 3:
-                participated_in_last_3 = False
-            else:
-                submission_data = self._load_data()
-                for cid in last_3_ids:
-                    user_subs = submission_data.get(user, [])
-                    if not any(str(s.get('contest_id')) == str(cid) for s in user_subs):
-                        participated_in_last_3 = False
-                        break
-            
-            change = raw_change + bonus
-            if participated_in_last_3:
-                change *= 1.1
-            
-            new_rating = current_rating + change
-            if new_rating > 4000:
-                new_rating = 4000 + (new_rating - 4000) / 2
-            
-            new_ratings[user] = int(round(new_rating))
-            user_manager.increment_participation(user)
+            if solved_indices:
+                hardest_idx = max(solved_indices)
+                # Map to problem rating
+                floor = problem_ratings[hardest_idx] - 200
+                
+                # Override: Solving G (idx 6, 3500) guarantees at least 3300 perf
+                if perf_rating < floor:
+                    perf_rating = floor
 
-        # Apply updates
-        for user, rating in new_ratings.items():
-            user_manager.users[user]['rating'] = rating
-        
-        user_manager.save_users()
+            # Step 3: Volatility Selection
+            # Use max of new history tracking and legacy counter to avoid resetting veterans to placement mode
+            rated_hist = user_manager.get_rated_participations(user)
+            legacy_count = user_manager.get_participation_count(user)
+            
+            # If we are re-rating this contest, don't double count it
+            current_is_rated = 1 if str(contest_id) in rated_hist else 0
+            
+            effective_count = max(len(rated_hist), legacy_count) - current_is_rated
+            
+            if effective_count < 5:
+                K = 0.8 # Placement Mode
+            elif perf_rating < effective_rating:
+                K = 0.1 # Mercy Mode
+            else:
+                K = 0.25 # Standard Mode
+
+            # Step 4: Update & Compression
+            raw_delta = K * (perf_rating - effective_rating)
+            
+            # Soft Compression for Enlightened Tiers
+            if effective_rating > 3000 and raw_delta > 0:
+                final_delta = raw_delta * 0.8
+            else:
+                final_delta = raw_delta
+            
+            delta_int = int(round(final_delta))
+            new_rating = int(effective_rating + delta_int)
+            
+            updates[user] = (delta_int, new_rating)
+
+        # 5. Commit Updates
+        for user, (delta, new_r) in updates.items():
+            user_manager.update_rated_participation(user, contest_id, delta, new_r)

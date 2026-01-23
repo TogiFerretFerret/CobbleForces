@@ -30,12 +30,25 @@ class UserManager:
     def get_participation_count(self, username):
         return self.users.get(username, {}).get('contests_participated', 0)
 
+    def get_rated_participations(self, username):
+        return self.users.get(username, {}).get('rated_participations', {})
+
+    def update_rated_participation(self, username, contest_id, delta, new_rating):
+        if username not in self.users: return
+        
+        if 'rated_participations' not in self.users[username]:
+            self.users[username]['rated_participations'] = {}
+            
+        self.users[username]['rated_participations'][str(contest_id)] = delta
+        self.users[username]['rating'] = new_rating
+        # Update contest count based on unique rated contests
+        self.users[username]['contests_participated'] = len(self.users[username]['rated_participations'])
+        self.save_users()
+
     def save_users(self):
         with open(self.users_file, 'w') as f:
             json.dump(self.users, f, indent=4)
 
     def increment_participation(self, username):
-        if username in self.users:
-            count = self.users[username].get('contests_participated', 0)
-            self.users[username]['contests_participated'] = count + 1
-            self.save_users()
+        # Deprecated in favor of update_rated_participation logic, but kept for compatibility if needed
+        pass

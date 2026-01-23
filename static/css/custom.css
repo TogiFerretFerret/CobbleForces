@@ -106,10 +106,10 @@ body {
 .user-legendary { color: #ff0000 !important; font-weight: bold; }
 
 /* Thematic High Tiers */
-.user-protagonist { color: #b8860b !important; font-weight: bold; border-bottom: 1px solid #ffd700; }
-.user-otaku { color: #00ffd0 !important; font-weight: bold; text-shadow: 1px 1px 0px #333; }
-.user-hime { color: #db7093 !important; font-weight: bold; animation: subtle-pulse-pink 2s infinite; }
-.user-yaoi { font-weight: bold; animation: subtle-pulse-purple 1.5s infinite; }
+.user-protagonist { color: #DAA520 !important; font-weight: bold; border-bottom: 2px solid #DAA520; }
+.user-otaku { color: #00CED1 !important; font-weight: bold; text-shadow: 1px 1px 0px #cccccc; }
+.user-hime { color: #FF69B4 !important; font-weight: bold; animation: subtle-pulse-pink 2s infinite; }
+.user-yaoi { color: #800080 !important; font-weight: bold; animation: subtle-pulse-purple 1.5s infinite; }
 .user-yuri { 
     font-weight: bold; 
     display: inline-block;
