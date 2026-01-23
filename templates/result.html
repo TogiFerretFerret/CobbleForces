@@ -83,8 +83,13 @@
         .then(response => response.json())
         .then(data => {
             // Update verdict and score
-            document.getElementById('verdict-display').innerText = data.verdict;
-            document.getElementById('verdict-display').className = `display-1 verdict-${data.verdict} mb-3`;
+            if (data.status === 'Judging' && data.verdict === 'AC') {
+                document.getElementById('verdict-display').innerText = `Running on test ${data.current_test || '...'}`;
+                document.getElementById('verdict-display').className = `display-1 text-muted mb-3`;
+            } else {
+                document.getElementById('verdict-display').innerText = data.verdict;
+                document.getElementById('verdict-display').className = `display-1 verdict-${data.verdict} mb-3`;
+            }
             
             if (data.status === 'Judging' || data.status === 'Finished') {
                 document.getElementById('score-display').innerHTML = `Score: <span class="text-primary">${data.score}</span> / ${data.max_points || 100}`;
@@ -123,7 +128,10 @@
             }
 
             if (data.status === 'Finished' || data.status === 'Error') {
-                // If finished, maybe do one final reload to be sure or just stop polling
+                // Update one last time before reload
+                document.getElementById('verdict-display').innerText = data.verdict;
+                document.getElementById('verdict-display').className = `display-1 verdict-${data.verdict} mb-3`;
+                document.getElementById('score-display').innerHTML = `Score: <span class="text-primary">${data.score}</span> / ${data.max_points || 100}`;
                 setTimeout(() => location.reload(), 1000);
             } else {
                 setTimeout(checkStatus, 1500);

@@ -190,7 +190,7 @@ def contest_dashboard(contest_id):
     if not contest: abort(404)
     
     if 'username' not in session:
-        return render_template('contest_dashboard.html', contest=contest, logged_in=False)
+        return render_template('contest_dashboard.html', contest=contest)
 
     username = session['username']
     problems = problem_manager.get_contest_problems(contest_id)
@@ -199,7 +199,6 @@ def contest_dashboard(contest_id):
     user_subs = contest_manager.get_user_submissions(username, contest_id)
 
     return render_template('contest_dashboard.html', 
-                           logged_in=True,
                            username=username,
                            contest=contest,
                            problems=problems,

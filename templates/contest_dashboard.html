@@ -3,7 +3,7 @@
 {% block title %}{{ contest.name }} - Dashboard{% endblock %}
 
 {% block content %}
-    {% if not logged_in %}
+    {% if not current_user %}
         <div class="col-12 text-center p-5">
              <h3>Please Login to participate in {{ contest.name }}</h3>
              <a href="/" class="btn btn-primary">Go to Login</a>
@@ -153,7 +153,7 @@
 {% endblock %}
 
 {% block scripts %}
-{% if logged_in %}
+{% if current_user %}
 <script>
     function selectProblem(pid) {
         const select = document.getElementById('problem_select');

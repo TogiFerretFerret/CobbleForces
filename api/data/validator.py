@@ -134,7 +134,9 @@ class Validator:
                     "score": int((passed_count / total_tests) * max_points) if total_tests > 0 else 0,
                     "max_points": max_points,
                     "tests": tests,
-                    "status": "Judging"
+                    "status": "Judging",
+                    "current_test": len(tests),
+                    "total_tests": total_tests
                 })
         
         if os.path.exists(exe_path):
