@@ -1,0 +1,77 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\geometry{letterpaper, margin=1in}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\title{\textbf{Editorial: Problem F - Optimal Mirroring}}
+\author{Setter: Riverxia}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Problem Overview}
+Touko wants to maintain the same relative order as a fixed permutation $a$ for $q$ different intervals. Yuu needs to find the minimum number of edges in a DAG $G_k$ such that its satisfying permutations are exactly those that match Touko's sister's relative order on the first $k$ intervals. This is equivalent to finding the size of the \textbf{transitive reduction} of the partial order defined by the union of constraints from the $k$ intervals.
+
+\section*{Solution Sketch}
+
+\subsection*{Key Observations}
+\begin{enumerate}
+    \item An edge $(u, v)$ is required in the transitive reduction if and only if $u < v$ in the partial order and there is no path of length $\ge 2$ from $u$ to $v$.
+    \item For a single interval $[l, r]$, the minimal set of edges is simply $x \to y$ for all pairs $(x, y)$ such that $a_x$ and $a_y$ are \textbf{consecutive values} in the sorted sub-permutation $a_l, \dots, a_r$. There are exactly $(r-l)$ such edges.
+    \item When multiple intervals overlap, an edge $u \to v$ from one interval might be rendered redundant by a path in another.
+\end{enumerate}
+
+\subsection*{The Algorithm}
+A crucial insight from the original problem (CF 1508F) is that we only need to consider ``candidate edges.'' These are edges $(u, v)$ such that $u$ and $v$ are adjacent in value in \textit{some} range.
+
+Using Mo's algorithm, we can maintain the set of edges where the values are adjacent. As we move the pointers $l$ and $r$, we add and remove edges. Each time an edge $(u, v)$ is formed, we track the range of $k$ for which it exists.
+
+However, many of these edges are redundant. Lemma 2 from the tutorial states that for any vertex $u$, there is at most one ``right edge'' $u \to u_r$ and at most one ``left edge'' $u \to u_l$ in the transitive reduction at any time.
+
+We can identify these candidate edges by running Mo's algorithm. There are $O(N \sqrt{Q})$ such candidate edges. For each candidate edge, we determine the time interval $[t_{start}, t_{end}]$ during which it is the ``best'' candidate and not ``hidden'' by a path of length 2.
+
+\section*{Complexity Analysis}
+\begin{itemize}
+    \item \textbf{Time Complexity:} $O(N \sqrt{Q} \log N)$ or $O(N \sqrt{Q})$ depending on the implementation of the candidate edge tracking. Given the 7s time limit, a Mo's algorithm approach is feasible.
+    \item \textbf{Space Complexity:} $O(N + Q)$ to store the permutation, queries, and candidate edge info.
+\end{itemize}
+
+\section*{Bloom into You Connection}
+Touko's struggle is about the pressure of maintaining a specific relative order (her sister's legacy). Yuu's task of finding the \textit{minimum} number of edges represents her finding the most fundamental truths about Touko—stripping away the redundant layers of the performance until only the essential constraints remain.
+
+\end{document}
