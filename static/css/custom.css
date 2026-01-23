@@ -67,23 +67,69 @@ body {
 .verdict-RE { color: #0000ff; font-weight: bold; }
 .verdict-CE { color: #888; font-weight: bold; }
 
-/* Rating Colors (Codeforces Style) */
-.user-lurker { color: #555555 !important; font-weight: bold; }      /* 0-399 */
-.user-newbie { color: #808080 !important; font-weight: bold; }      /* 400-799 */
-.user-beginner { color: #aaaaaa !important; font-weight: bold; }    /* 800-1199 */
-.user-pupil { color: #008000 !important; font-weight: bold; }       /* 1200-1399 */
-.user-specialist { color: #03a89e !important; font-weight: bold; }  /* 1400-1599 */
-.user-expert { color: #0000ff !important; font-weight: bold; }      /* 1600-1899 */
-.user-candidate-master { color: #aa00aa !important; font-weight: bold; } /* 1900-2099 */
-.user-master { color: #ff8c00 !important; font-weight: bold; }      /* 2100-2299 */
-.user-international-master { color: #ff8c00 !important; font-weight: bold; } /* 2300-2399 */
-.user-grandmaster { color: #ff0000 !important; font-weight: bold; } /* 2400-2499 */
-.user-legendary { color: #ff0000 !important; font-weight: bold; }   /* 2500-2749 */
-.user-overlord { color: #d4af37 !important; font-weight: bold; }    /* 2750-2999 (Gold) */
-.user-yaoi { font-weight: bold; }
-.user-yuri { font-weight: bold; }
+/* Advanced Rating Styles & Animations */
+
+@keyframes pulse-gold {
+    0% { text-shadow: 0 0 5px #ffd700; }
+    50% { text-shadow: 0 0 20px #ffd700, 0 0 30px #ff8c00; }
+    100% { text-shadow: 0 0 5px #ffd700; }
+}
+
+@keyframes pulse-purple {
+    0% { text-shadow: 0 0 5px #800080; }
+    50% { text-shadow: 0 0 20px #800080, 0 0 30px #4b0082; }
+    100% { text-shadow: 0 0 5px #800080; }
+}
+
+@keyframes rainbow-text {
+    0% { color: #ff0000; }
+    15% { color: #ff8c00; }
+    30% { color: #ffff00; }
+    45% { color: #00ff00; }
+    60% { color: #0000ff; }
+    75% { color: #4b0082; }
+    90% { color: #ee82ee; }
+    100% { color: #ff0000; }
+}
+
+@keyframes sparkle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+.user-lurker { color: #555555 !important; font-weight: bold; }
+.user-newbie { color: #808080 !important; font-weight: bold; }
+.user-beginner { color: #aaaaaa !important; font-weight: bold; }
+.user-pupil { color: #008000 !important; font-weight: bold; }
+.user-specialist { color: #03a89e !important; font-weight: bold; }
+.user-expert { color: #0000ff !important; font-weight: bold; }
+.user-candidate-master { color: #aa00aa !important; font-weight: bold; }
+.user-master { color: #ff8c00 !important; font-weight: bold; }
+.user-international-master { color: #ff8c00 !important; font-weight: bold; }
+.user-grandmaster { color: #ff0000 !important; font-weight: bold; }
+.user-legendary { color: #ff0000 !important; font-weight: bold; }
+.user-overlord { color: #d4af37 !important; font-weight: bold; }
+
+/* New Tiers Styles */
+.user-prophet { color: #00ffff !important; font-weight: bold; text-shadow: 0 0 8px #00ffff; }
+.user-celestial { color: #ffffff !important; font-weight: bold; text-shadow: 0 0 10px #add8e6, 0 0 20px #ffffff; }
+.user-god { color: #ffd700 !important; font-weight: bold; animation: pulse-gold 2s infinite; }
+.user-mythic { font-weight: bold; animation: rainbow-text 3s infinite linear; }
+
+/* Yaoi/Yuri Overhaul */
+.user-yaoi { font-weight: bold; animation: pulse-purple 1.5s infinite; }
+.user-yuri { font-weight: bold; text-shadow: 0 0 5px #ff69b4, 0 0 10px #ff1493; }
 
 .legendary-first { color: #000000 !important; }
+
+/* Perk Icons */
+.perk-icon {
+    font-size: 0.9em;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+.crown-gold { color: #ffd700; text-shadow: 0 0 3px #000; }
+.star-silver { color: #c0c0c0; }
 
 /* Footer */
 .footer {

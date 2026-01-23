@@ -28,7 +28,7 @@
                         <tr {% if entry.username == current_user %}class="table-info"{% endif %}>
                             <td class="text-center">{{ loop.index }}</td>
                             <td class="user-cell">
-                                {{ entry.username | handle(entry.rating) }}
+                                {{ entry.username | handle(entry.rating) }}{{ entry.rating | handle_icon }}
                             </td>
                             <td class="text-center fw-bold text-primary">{{ entry.total_score }}</td>
                             

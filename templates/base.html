@@ -48,7 +48,7 @@
               
               <div class="d-flex text-light align-items-center" style="font-size: 0.9em;">
                 {% if current_user %}
-                    <span class="me-3">Welcome, {{ current_user | handle(current_user_rating) }}</span>
+                    <span class="me-3">Welcome, {{ current_user | handle(current_user_rating) }}{{ current_user_rating | handle_icon }}</span>
                     <a href="/logout" class="text-light text-decoration-none fw-bold">Logout</a>
                 {% else %}
                     <a href="/" class="text-light text-decoration-none fw-bold">Enter</a>

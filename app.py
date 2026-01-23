@@ -56,11 +56,15 @@ def format_handle(username, rating=None):
     elif r < 2500: cls = "user-grandmaster"
     elif r < 2750: cls = "user-legendary"
     elif r < 3000: cls = "user-overlord"
-    elif r < 3600: cls = "user-yaoi"
+    elif r < 3200: cls = "user-prophet"
+    elif r < 3400: cls = "user-celestial"
+    elif r < 3600: cls = "user-god"
+    elif r < 3800: cls = "user-mythic"
+    elif r < 4000: cls = "user-yaoi"
     else: cls = "user-yuri"
 
-    # Yuri Case (Bocchi Themed) >= 3600
-    if r >= 3600:
+    # Yuri Case (Bocchi Themed) >= 4000
+    if r >= 4000:
         colors = ['#E7569D', '#E60416', '#F3C047', '#0067C0', '#F3C047', '#9B59B6', '#808080', '#8B4513']
         formatted_name = ""
         for i, char in enumerate(username):
@@ -68,34 +72,37 @@ def format_handle(username, rating=None):
             formatted_name += f'<span style="color: {color}; font-weight: bold;">{char}</span>'
         return Markup(f'<span class="user-yuri" style="font-weight: bold;">{formatted_name}</span>')
 
-    # Yaoi Case (Black + Purple) 3000 <= r < 3600
-    if r >= 3000 and r < 3600:
+    # Yaoi Case (Black + Purple + Glow) 3800 <= r < 4000
+    if r >= 3800 and r < 4000:
         first = username[0]
         rest = username[1:]
-        # Deep Purple #800080
-        return Markup(f'<span style="font-weight:bold"><span class="legendary-first">{first}</span><span style="color:#800080">{rest}</span></span>')
+        return Markup(f'<span class="user-yaoi"><span class="legendary-first">{first}</span><span style="color:#800080">{rest}</span></span>')
 
-    # Overlord Case (Black + Gold) 2750 <= r < 3000
-    if r >= 2750 and r < 3000:
-        first = username[0]
-        rest = username[1:]
-        return Markup(f'<span style="font-weight:bold"><span class="legendary-first">{first}</span><span style="color:#d4af37">{rest}</span></span>')
-
-    # Nutella case (Legendary GM) 2500 <= r < 2750
-    if r >= 2500 and r < 2750:
+    # Special logic for Nutella-style (LGM, Overlord)
+    if (r >= 2500 and r < 3000):
         first = username[0]
         rest = username[1:]
         return Markup(f'<span class="{cls}"><span class="legendary-first">{first}</span>{rest}</span>')
     
     return Markup(f'<span class="{cls}">{username}</span>')
 
+@app.template_filter('handle_icon')
+def handle_icon(rating):
+    try: r = int(rating)
+    except: return ""
+    if r >= 4000: return Markup('<span class="perk-icon crown-gold" title="Yuri Overlord">👑</span>')
+    if r >= 3800: return Markup('<span class="perk-icon" title="Yaoi Master">🎖️</span>')
+    if r >= 3600: return Markup('<span class="perk-icon" title="Mythic Entity">💎</span>')
+    if r >= 3400: return Markup('<span class="perk-icon crown-gold" title="Godhood">⚜️</span>')
+    if r >= 3000: return Markup('<span class="perk-icon star-silver" title="Ascended">✨</span>')
+    return ""
+
 @app.template_filter('rank_name')
 def get_rank_name(rating, gender='Male'):
     try: r = int(rating)
     except: r = 0
     
-    # Defaults
-    if gender not in ['Male', 'Female']: gender = 'Male' # Treat others as Male for titles for now unless specified
+    if gender not in ['Male', 'Female']: gender = 'Male'
     
     if r < 400: return "Lurker"
     elif r < 800: return "Newbie"
@@ -109,7 +116,11 @@ def get_rank_name(rating, gender='Male'):
     elif r < 2500: return "Grandmaster"
     elif r < 2750: return "Legendary Grandmaster"
     elif r < 3000: return "Overlord"
-    elif r < 3600:
+    elif r < 3200: return "Prophet"
+    elif r < 3400: return "Celestial"
+    elif r < 3600: return "God"
+    elif r < 3800: return "Mythic"
+    elif r < 4000:
         return "Fujoshi" if gender == "Female" else "Fudanshi"
     return "Yurijoshi" if gender == "Female" else "Yuridanshi"
 

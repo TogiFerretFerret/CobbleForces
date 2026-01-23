@@ -22,9 +22,9 @@
                         {% for user in rankings %}
                         <tr {% if user.username == current_user %}class="table-info"{% endif %}>
                             <td class="text-center">{{ loop.index }}</td>
-                            <td class="user-cell">
-                                {{ user.username | handle(user.rating) }}
-                            </td>
+                        <td>
+                            <span style="font-size: 1.1rem;">{{ user.username | handle(user.rating) }}{{ user.rating | handle_icon }}</span>
+                        </td>
                             <td class="text-center fw-bold">
                                 {{ user.rating }}
                             </td>
