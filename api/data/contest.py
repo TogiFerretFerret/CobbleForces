@@ -35,7 +35,30 @@ class ContestManager:
         return new_id
 
     def get_contest(self, contest_id):
-        return self.contests.get(str(contest_id))
+        c = self.contests.get(str(contest_id))
+        if c:
+            # Schema migration: Ensure lists exist
+            if 'announcements' not in c: c['announcements'] = []
+            if 'clarifications' not in c: c['clarifications'] = []
+        return c
+
+    def add_announcement(self, contest_id, message):
+        c = self.get_contest(contest_id)
+        if c:
+            c['announcements'].append({
+                'message': message,
+                'timestamp': time.time()
+            })
+            self.save_contests()
+
+    def add_clarification(self, contest_id, message):
+        c = self.get_contest(contest_id)
+        if c:
+            c['clarifications'].append({
+                'message': message,
+                'timestamp': time.time()
+            })
+            self.save_contests()
 
     def get_all_contests(self):
         # Return list sorted by start time (newest first)
@@ -198,51 +221,100 @@ class ContestManager:
         leaderboard.sort(key=lambda x: (-x['total_solved'], x['total_penalty']))
 
         # Predict Delta (NQE Logic)
-        if leaderboard:
+        if leaderboard and user_manager:
             # Assign ranks for delta calculation
             for i, entry in enumerate(leaderboard):
                 if i > 0 and leaderboard[i]['total_solved'] == leaderboard[i-1]['total_solved'] and leaderboard[i]['total_penalty'] == leaderboard[i-1]['total_penalty']:
                     entry['actual_rank'] = leaderboard[i-1]['actual_rank']
                 else:
                     entry['actual_rank'] = i + 1
+            
+            # Idempotency: Revert ratings to get effective_rating
+            for entry in leaderboard:
+                user = entry['username']
+                rated_hist = user_manager.get_rated_participations(user)
+                current_r = entry['rating']
+                if str(contest_id) in rated_hist:
+                    old_delta = rated_hist[str(contest_id)]
+                    entry['effective_rating'] = current_r - old_delta
+                else:
+                    entry['effective_rating'] = current_r
+
+            problem_ratings = [800, 1000, 1100, 1700, 2500, 3100, 3500]
+
+            def get_elo_win_probability(ra, rb):
+                return 1.0 / (1.0 + 10.0 ** ((rb - ra) / 400.0))
+
+            def get_seed(rating, exclude_user=None):
+                seed = 1.0
+                for opponent in leaderboard:
+                    if opponent['username'] == exclude_user: continue
+                    opp_r = opponent.get('effective_rating', opponent['rating'])
+                    seed += get_elo_win_probability(opp_r, rating)
+                return seed
+            
+            def find_performance_rating(actual_rank, exclude_user):
+                low = 0
+                high = 4500
+                for _ in range(60):
+                    mid = (low + high) / 2
+                    if get_seed(mid, exclude_user) < actual_rank:
+                        high = mid
+                    else:
+                        low = mid
+                return mid
 
             for entry in leaderboard:
                 user = entry['username']
-                curr = entry['rating']
-                rank = entry['actual_rank']
+                effective_rating = entry['effective_rating']
+                actual_rank = entry['actual_rank']
                 
-                def prob(ra, rb): return 1 / (1 + 10 ** ((rb - ra) / 400))
-                def get_seed(r, exc):
-                    s = 1.0
-                    for opp in leaderboard:
-                        if opp['username'] == exc: continue
-                        s += prob(opp['rating'], r)
-                    return s
+                # Step 1: Base Performance
+                perf_rating = find_performance_rating(actual_rank, user)
                 
-                low, high = 0, 8000
-                for _ in range(40):
-                    mid = (low + high) / 2
-                    if get_seed(mid, user) < rank: high = mid
-                    else: low = mid
+                # Step 2: Boss Slayer Floor
+                solved_indices = []
+                for pid, info in entry['breakdown'].items():
+                    if info['solved']:
+                        try:
+                            idx = ord(pid.upper()[0]) - ord('A')
+                            if 0 <= idx < len(problem_ratings):
+                                solved_indices.append(idx)
+                        except:
+                            pass
                 
-                perf = mid
-                p_count = user_manager.get_participation_count(user) if user_manager else 0
-                k = 0.5 if p_count <= 10 else 0.2
-                if perf < curr: k /= 2
+                if solved_indices:
+                    hardest_idx = max(solved_indices)
+                    floor = problem_ratings[hardest_idx] - 200
+                    if perf_rating < floor:
+                        perf_rating = floor
+
+                # Step 3: Volatility
+                rated_hist = user_manager.get_rated_participations(user)
+                legacy_count = user_manager.get_participation_count(user)
+                current_is_rated = 1 if str(contest_id) in rated_hist else 0
+                effective_count = max(len(rated_hist), legacy_count) - current_is_rated
                 
-                raw_change = k * (perf - curr)
-                # Protagonist bonus: if solved at least one
-                bonus = 5 if (curr < 1200 and entry['total_solved'] > 0) else 0
-                # Speedster bonus: if avg penalty < 20 mins
-                if entry['is_speedster']:
-                    bonus += 2
+                if effective_count < 5:
+                    K = 0.8
+                elif perf_rating < effective_rating:
+                    K = 0.1
+                else:
+                    K = 0.25
                 
-                change = raw_change + bonus
+                # Step 4: Update & Compression
+                raw_delta = K * (perf_rating - effective_rating)
+                if effective_rating > 3000 and raw_delta > 0:
+                    final_delta = raw_delta * 0.8
+                else:
+                    final_delta = raw_delta
                 
-                new_r = curr + change
-                if new_r > 4000: new_r = 4000 + (new_r - 4000) / 2
+                delta_int = int(round(final_delta))
+                new_rating = int(effective_rating + delta_int)
                 
-                entry['delta'] = int(round(new_r - curr))
+                # Delta should be difference from CURRENT rating (what is shown in table)
+                # If already rated, this will be 0.
+                entry['delta'] = new_rating - entry['rating']
 
         return leaderboard
 
@@ -293,7 +365,7 @@ class ContestManager:
 
         def find_performance_rating(actual_rank, exclude_user):
             low = 0
-            high = 8000
+            high = 4500
             for _ in range(60):
                 mid = (low + high) / 2
                 if get_seed(mid, exclude_user) < actual_rank:

@@ -16,6 +16,31 @@
 
     <!-- MAIN CONTENT -->
     <div class="col-md-9">
+        <!-- Messages Area -->
+        {% if contest.announcements or contest.clarifications %}
+            <div class="mb-4">
+                {% for a in contest.announcements|reverse %}
+                <div class="alert alert-info shadow-sm d-flex align-items-center" role="alert">
+                    <span class="me-2 fs-4">📢</span>
+                    <div>
+                        <strong>Announcement:</strong> {{ a.message }}
+                        <div class="text-muted small" style="font-size: 0.8em;">{{ a.timestamp | datetime }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                {% for c in contest.clarifications|reverse %}
+                <div class="alert alert-warning shadow-sm d-flex align-items-center" role="alert">
+                    <span class="me-2 fs-4">⚠️</span>
+                    <div>
+                        <strong>Clarification:</strong> {{ c.message }}
+                        <div class="text-muted small" style="font-size: 0.8em;">{{ c.timestamp | datetime }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-white">
                 <h5 class="text-primary m-0">Problems</h5>

@@ -415,6 +415,24 @@ def edit_contest(contest_id):
     problems = problem_manager.get_contest_problems(contest_id)
     return render_template('edit_contest.html', contest=contest, problems=problems)
 
+@app.route('/admin/post_announcement/<contest_id>', methods=['POST'])
+@admin_required
+def post_announcement(contest_id):
+    msg_text = request.form.get('message')
+    if msg_text:
+        contest_manager.add_announcement(contest_id, msg_text)
+        return redirect(url_for('edit_contest', contest_id=contest_id, msg="Announcement Posted", msg_type="success"))
+    return redirect(url_for('edit_contest', contest_id=contest_id, msg="Empty message", msg_type="error"))
+
+@app.route('/admin/post_clarification/<contest_id>', methods=['POST'])
+@admin_required
+def post_clarification(contest_id):
+    msg_text = request.form.get('message')
+    if msg_text:
+        contest_manager.add_clarification(contest_id, msg_text)
+        return redirect(url_for('edit_contest', contest_id=contest_id, msg="Clarification Posted", msg_type="success"))
+    return redirect(url_for('edit_contest', contest_id=contest_id, msg="Empty message", msg_type="error"))
+
 @app.route('/admin/add_problem/<contest_id>', methods=['POST'])
 @admin_required
 def add_problem(contest_id):

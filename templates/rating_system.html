@@ -6,9 +6,9 @@
 <div class="col-12">
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
-            <h2 class="text-primary mb-4">Rating System</h2>
+            <h2 class="text-primary mb-4">Rating System v2.0</h2>
             <p>
-                CobbleForces uses an advanced tiered rating system powered by the <strong><a href="/nqe">NQE (Not Quite Elo)</a></strong> algorithm. The higher your rating, the more legendary your appearance becomes.
+                CobbleForces uses a tiered ranking structure inspired by anime subculture. The highest ranks (3000+) are <strong>"Enlightened"</strong> and receive special visual effects.
             </p>
 
             <h4 class="mt-5 mb-3">Enlightened Tiers (3000+)</h4>
@@ -16,59 +16,50 @@
                 <table class="table table-bordered table-cf align-middle">
                     <thead class="table-dark">
                         <tr>
-                            <th>Range</th>
+                            <th>Rating</th>
                             <th>Title (M/F)</th>
-                            <th>Design & Perks</th>
+                            <th>Color / Effect</th>
+                            <th>Perk Icon</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr class="table-light">
                             <td>4000+</td>
                             <td>
-                                <span class="user-yuri">
-                                    <span style="color: #E7569D;">Y</span><span style="color: #E60416;">u</span><span style="color: #F3C047;">r</span><span style="color: #0067C0;">i</span><span style="color: #F3C047;">d</span><span style="color: #9B59B6;">a</span><span style="color: #808080;">n</span><span style="color: #8B4513;">s</span><span style="color: #E7569D;">h</span><span style="color: #E60416;">i</span><span style="color: #F3C047;"> </span><span style="color: #0067C0;">/</span><span style="color: #F3C047;"> </span><span style="color: #9B59B6;">Y</span><span style="color: #808080;">u</span><span style="color: #8B4513;">r</span><span style="color: #E7569D;">i</span><span style="color: #E60416;">j</span><span style="color: #F3C047;">o</span><span style="color: #0067C0;">s</span><span style="color: #F3C047;">h</span><span style="color: #9B59B6;">i</span>
-                                </span>
+                                {{ "Yuridanshi / Yurijoshi"|handle(4000) }}
                             </td>
-                            <td><span class="user-yuri">Bocchi Colors + Animated Bloom & Float + 👑 Crown Perk</span></td>
+                            <td><span class="user-yuri">Bocchi Palette Rotation + Bloom</span></td>
+                            <td>👑 (Crown)</td>
                         </tr>
                         <tr>
                             <td>3800 — 3999</td>
-                            <td><span class="user-yaoi">Fudanshi / Fujoshi</span></td>
-                            <td><span class="user-yaoi">Pulsing Purple Shadow + 🎖️ Medal Perk</span></td>
+                            <td>{{ "Fudanshi / Fujoshi"|handle(3800) }}</td>
+                            <td><span class="user-yaoi" style="color:#800080">Purple / Black First Letter + Pulse</span></td>
+                            <td>🎖️ (Medal)</td>
                         </tr>
                         <tr>
                             <td>3500 — 3799</td>
                             <td><span class="user-hime">Himedanshi / Himejoshi</span></td>
-                            <td><span class="user-hime">Soft Pink Pulse + 🌸 Sakura Trick</span></td>
+                            <td><span class="user-hime">Pink + Sakura Trick</span></td>
+                            <td>🌸 (Sakura)</td>
                         </tr>
                         <tr>
                             <td>3200 — 3499</td>
                             <td><span class="user-otaku">Otaku</span></td>
-                            <td><span class="user-otaku">Sharp Neon Teal Text + 🗡️ Protagonist Perk</span></td>
+                            <td><span class="user-otaku">Turquoise/Cyan + 1px Shadow</span></td>
+                            <td>🗡️ (Sword)</td>
                         </tr>
                         <tr>
                             <td>3000 — 3199</td>
                             <td><span class="user-protagonist">Protagonist</span></td>
-                            <td><span class="user-protagonist">Golden Underline + 🗡️ Protagonist Perk</span></td>
+                            <td><span class="user-protagonist">Gold + Underline</span></td>
+                            <td>🗡️ (Sword)</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <h4 class="mt-5 mb-3">Perks & Icons</h4>
-            <div class="card bg-light border-0">
-                <div class="card-body">
-                    <p class="text-muted small mb-3">Special perks are granted to users who reach Enlightened Tiers. These cosmetic enhancements signify your standing in the community.</p>
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-2">👑 <strong>Crown Perk:</strong> The mark of a Yuri Overlord. Bestows the legendary multi-colored animated handle inspired by the Kessoku Band.</li>
-                        <li class="mb-2">🎖️ <strong>Medal Perk:</strong> Awarded to Yaoi Masters. Adds a pulsing purple shadow and a medal of distinction to your handle.</li>
-                        <li class="mb-2">🌸 <strong>Sakura Trick:</strong> Named for obvious reasons, this perk grants Hime-tier users a soft pink pulsing glow reminiscent of cherry blossoms.</li>
-                        <li>🗡️ <strong>Protagonist Perk:</strong> Standard for all Enlightened users. Signifies that you are the main character of your own competitive programming journey.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <h4 class="mt-5 mb-3">Competitive Tiers</h4>
+            <h4 class="mt-5 mb-3">Competitive Tiers (Standard)</h4>
             <div class="table-responsive">
                 <table class="table table-bordered table-cf align-middle">
                     <thead class="table-light">
@@ -80,18 +71,18 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>2500 — 2999</td>
-                            <td><strong><span class="legendary-first">L</span><span class="user-legendary">egendary Grandmaster</span></strong></td>
-                            <td>Black first letter, Red rest</td>
+                            <td>2600 — 2999</td>
+                            <td><strong><span class="legendary-first">L</span><span class="user-grandmaster">egendary Grandmaster</span></strong></td>
+                            <td>Black first letter, Red</td>
                         </tr>
                         <tr>
-                            <td>2400 — 2499</td>
+                            <td>2400 — 2599</td>
                             <td><span class="user-grandmaster">Grandmaster</span></td>
                             <td>Red</td>
                         </tr>
                         <tr>
                             <td>2300 — 2399</td>
-                            <td><span class="user-master">International Master</span></td>
+                            <td><span class="user-international-master">International Master</span></td>
                             <td>Orange</td>
                         </tr>
                         <tr>
@@ -120,22 +111,16 @@
                             <td>Green</td>
                         </tr>
                         <tr>
-                            <td>800 — 1199</td>
-                            <td><span class="user-beginner">Beginner</span></td>
-                            <td>Light Gray</td>
-                        </tr>
-                        <tr>
-                            <td>400 — 799</td>
+                            <td>0 — 1199</td>
                             <td><span class="user-newbie">Newbie</span></td>
                             <td>Gray</td>
                         </tr>
-                        <tr>
-                            <td>0 — 399</td>
-                            <td><span class="user-lurker">Lurker</span></td>
-                            <td>Dark Gray</td>
-                        </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="mt-5">
+                <p class="text-muted small">Rating calculation details can be found on the <a href="/nqe">NQE Algorithm</a> page.</p>
             </div>
         </div>
     </div>

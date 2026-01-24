@@ -87,7 +87,7 @@ body {
     100% { text-shadow: 0 0 2px #800080; }
 }
 
-@keyframes subtle-pulse-pink {
+@keyframes sakura-trick-pulse {
     0% { text-shadow: 0 0 2px #ff69b4; }
     50% { text-shadow: 0 0 8px #ff69b4; }
     100% { text-shadow: 0 0 2px #ff69b4; }
@@ -108,7 +108,7 @@ body {
 /* Thematic High Tiers */
 .user-protagonist { color: #DAA520 !important; font-weight: bold; border-bottom: 2px solid #DAA520; }
 .user-otaku { color: #00CED1 !important; font-weight: bold; text-shadow: 1px 1px 0px #cccccc; }
-.user-hime { color: #FF69B4 !important; font-weight: bold; animation: subtle-pulse-pink 2s infinite; }
+.user-hime { color: #FF69B4 !important; font-weight: bold; animation: sakura-trick-pulse 2s infinite; }
 .user-yaoi { color: #800080 !important; font-weight: bold; animation: subtle-pulse-purple 1.5s infinite; }
 .user-yuri { 
     font-weight: bold; 

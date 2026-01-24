@@ -1,0 +1,73 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\geometry{letterpaper, margin=1in}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\title{\textbf{Editorial: Problem D - The Aquarium}}
+\author{Setter: Hudson}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Problem Overview}
+Partition an array of length $N$ into exactly $K$ subarrays to minimize:
+$$ \sum_{i=1}^K ((len_i)^2 + sum_i) $$
+where $len_i$ is the length and $sum_i$ is the sum of elements of the $i$-th subarray.
+
+\section*{Difficulty Analysis}
+Rating: \textbf{3000}.
+Constraints: $N, K \le 10^5$.
+Naive DP: $dp[k][i]$ is min cost to split prefix $i$ into $k$ parts. $O(N^2 K)$.
+Optimized DP: Using Convex Hull Trick (CHT) reduces transition to $O(1)$ or $O(\log N)$, giving $O(NK)$. Still too slow.
+The function $f(K) = \text{min total cost with exactly } K \text{ subarrays}$ is \textbf{convex}.
+This allows the use of **WQS Binary Search** (Alien's Trick).
+
+\section*{Solution Approach}
+1. **Alien's Trick:**
+   Instead of fixing $K$, we introduce a penalty $\lambda$ for starting a new subarray.
+   We minimize: Total Cost $+ \lambda \times (\text{number of subarrays})$.
+   For a fixed $\lambda$, let $g(\lambda)$ be the minimum cost and $cnt(\lambda)$ be the number of subarrays used.
+   We can binary search for $\lambda$ such that $cnt(\lambda) \approx K$.
+   The answer will be $g(\lambda) - \lambda \times K$.
+
+2. **Inner DP Optimization:**
+   With fixed $\lambda$, we just need to find the min cost for \textit{any} number of subarrays.
+   $dp[i] = \min_{j < i} \{ dp[j] + (i - j)^2 + (S[i] - S[j]) + \lambda \}$
+   where $S[x]$ is prefix sum of $A$.
+   Expand terms:
+   $dp[i] = i^2 + S[i] + \lambda + \min_{j < i} \{ dp[j] + j^2 - S[j] - 2ij \}$
+   This is the form $y = mx + c$ where:
+   $m = -2j$
+   $x = i$
+   $c = dp[j] + j^2 - S[j]$
+   We can use the **Convex Hull Trick (CHT)** to maintain the lines and query the minimum at $x = i$. Since $i$ increases and slopes $-2j$ are monotonic, we can use a Deque for $O(N)$ inner DP.
+
+3. **Algorithm:**
+   Binary search $\lambda$ in range $[-10^{18}, 10^{18}]$.
+   Inside check, run $O(N)$ DP using CHT (deque).
+   Recover answer.
+
+Complexity: $O(N \log (\text{Range of } \lambda))$.
+
+\end{document}

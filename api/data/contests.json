@@ -4,5 +4,14 @@
         "name": "CobbleForces Round #1 (Div. 2)",
         "start_time": 1769115360.0,
         "end_time": 1769212560.0
+    },
+    "2": {
+        "id": "2",
+        "name": "CobbleForces Round #2 (Div. 1)",
+        "start_time": 1769206440.0,
+        "end_time": 1769386440.0,
+        "announcements": [
+        ],
+        "clarifications": []
     }
 }

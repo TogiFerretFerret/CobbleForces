@@ -1,0 +1,131 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{verbatim}
+\usepackage{fancyhdr}
+
+\geometry{letterpaper, margin=1in}
+
+\title{\textbf{Problem F: Rewrite The Stars}}
+\author{Time Limit: 8.0s | Memory Limit: 1024MB}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Prologue: The Event Horizon}
+
+\begin{center}
+\textit{"I reached out for a star, and it burned my hand. I reached out for you, and I burned my soul. \\ If the script is a cage, then I will break the bars with my own ribs. \\ Watch me, Koyomi. Watch me rewrite the sky until the stars align in a shape that doesn't hurt."} \\
+\vspace{0.5em}
+--- \textbf{Touko Nanami}, \textit{The Student Council Play (Draft 4,096)}
+\end{center}
+
+\section*{The Cosmology of the Heart}
+
+The Student Council play has ceased to be a mere performance. It has metastasized into a \textbf{Cosmological Singularity}, —a collapsing star system within Touko Nanami's subconscious. Koyomi Kanou, once a humble scriptwriter, now finds herself cast as the \textbf{Observer} at the end of time, watching the \textbf{Architect} (Touko) frantically tear apart the fabric of reality to construct a "self" that does not exist.
+
+The narrative universe is modeled as a chaotic, expanding nebula of $N$ \textbf{Stellar Fragments} (indexed $1$ to $N$). Each Fragment $i$ is a crystallized moment of time that radiates a specific \textbf{Luminosity} $W_i$, representing the emotional gravity of that timeline. These Fragments drift through the void, occasionally bound together by \textbf{Threads of Fate}—invisible, indestructible causal links that dictate that two narrative beats are inextricably entangled.
+
+\section*{The Laws of Celestial Mechanics}
+
+Touko seeks to crystallize this chaos into a stable configuration known as the \textbf{Constellation of Solitude}. However, the physics of this broken heart obey two cruel and fundamental laws that cannot be violated, even by the Architect:
+
+\begin{enumerate}
+    \item \textbf{The Exclusion Principle of Intimacy:} 
+    A Thread of Fate is a bond of mutual destruction. If two Stellar Fragments are bound by such a Thread, they cannot \textit{both} exist in the Final Constellation. To choose one implies the necessary rejection of the other; the narrative tension between them is too great. To attempt to hold both would cause a narrative paradox, collapsing the script into white noise.
+    
+    \item \textbf{The Axiom of Brilliance:} 
+    The universe naturally tends toward the state of highest energy. Among all thermodynamically stable Constellations (those satisfying the Exclusion Principle), the \textbf{True Ending} is defined as the unique configuration that maximizes the \textbf{Total Luminosity} (the sum of $W_i$ of the selected Fragments).
+\end{enumerate}
+
+\section*{The Age of Instability}
+
+The universe is not static. It is a violent, shifting storm. Touko is rewriting the laws of physics in real-time, searching for a solution that mathematically cannot exist. As the Observer, you must track the state of the True Ending across $Q$ epochal \textbf{Cosmic Shifts}. 
+
+The timeline is mutable, and the following cataclysms may occur:
+
+\begin{itemize}
+    \item \textbf{Type 1: "Weave Destiny"} \\
+    The Architect defies the natural expansion of the universe. She perceives two divergent timelines, Fragment $u$ and Fragment $v$, drifting in the cold void of separate galaxies. Refusing to accept their isolation, she weaves a new \textbf{Thread of Fate} between them, violently merging their respective galaxies into a single, larger structure. The Exclusion Principle immediately applies to this new bond.
+    \textit{(Constraint: It is guaranteed that $u$ and $v$ currently drift in separate, unconnected galaxies.)}
+
+    \item \textbf{Type 2: "Sever the Bond"} \\
+    Entropy asserts its dominance. The Architect realizes that the connection binding Fragment $u$ and Fragment $v$ is not a lifeline, but a shackle. She severs the \textbf{Thread of Fate} between them, casting them adrift. The single galaxy splits into two smaller, independent nebulas.
+    \textit{(Constraint: It is guaranteed that a Thread currently binds $u$ and $v$.)}
+
+    \item \textbf{Type 3: "Shift Resonance"} \\
+    A stellar metamorphosis occurs. The internal fusion reaction of Fragment $u$ accelerates or decays based on the Architect's whim. Its \textbf{Luminosity} alters to become $w$. This change ripples through the galaxy, potentially altering which Constellation satisfies the Axiom of Brilliance.
+    
+    \item \textbf{Type 4: "Gaze into the Abyss"} \\
+    The Architect pauses, trembling, and asks the Observer: "If the universe froze in this exact configuration, how bright would the True Ending be for the galaxy containing Fragment $u$?" You must calculate the Total Luminosity of the True Ending for the galaxy currently housing $u$.
+\end{itemize}
+
+The entropy is rising. The script is being rewritten faster than the speed of light. Can you calculate the weight of a ghost before it disappears?
+
+\section*{Input}
+
+The first line contains two integers $N$ and $Q$ ($1 \le N, Q \le 50,000$) — the number of Stellar Fragments and the number of Cosmic Shifts.
+The second line contains $N$ integers $W_1, W_2, \dots, W_N$ ($1 \le W_i \le 10^9$), the initial Luminosity of each Fragment.
+The next line contains an integer $M$ ($0 \le M < N$), the number of primordial Threads of Fate existing at the dawn of time.
+The next $M$ lines each contain two integers $u$ and $v$, indicating a primordial Thread connecting $u$ and $v$.
+
+The next $Q$ lines describe the Cosmic Shifts. Each line starts with an integer $T$ ($1 \le T \le 4$):
+\begin{itemize}
+    \item \texttt{1 u v}: Weave Destiny between $u$ and $v$.
+    \item \texttt{2 u v}: Sever Connection between $u$ and $v$.
+    \item \texttt{3 u w}: Shift Resonance of $u$ to $w$.
+    \item \texttt{4 u}: Gaze into the Abyss at $u$.
+\end{itemize}
+
+\section*{Output}
+
+For each Type 4 operation, output a single integer: the Total Luminosity of the True Ending for the galaxy containing the specified Fragment.
+
+\section*{Examples}
+
+\subsection*{Example 1}
+\textbf{Input:}
+\begin{verbatim}
+5 7
+10 20 30 40 50
+0
+1 1 2
+1 2 3
+4 1
+3 2 100
+4 1
+2 2 3
+4 3
+\end{verbatim}
+
+\textbf{Output:}
+\begin{verbatim}
+40
+100
+30
+\end{verbatim}
+
+\textbf{Explanation:}
+\begin{itemize}
+    \item \textbf{In the beginning:} 5 silent, isolated stars drift in the void.
+    \item \textbf{Shift 1:} A Thread forms between 1 and 2. The galaxy \{1, 2\} is born.
+    \item \textbf{Shift 2:} The web expands to 3. The galaxy is \{1, 2, 3\} with structure $1-2-3$.
+    \item \textbf{Shift 3:} We seek the True Ending for \{1, 2, 3\}. 
+    The Exclusion Principle forbids taking \{1, 2\} or \{2, 3\}.
+    Options: \{1, 3\} (Luminosity $10+30=40$) or \{2\} (Luminosity $20$).
+    The True Ending shines with brightness \textbf{40}.
+    \item \textbf{Shift 4:} Fragment 2 burns brighter, becoming a supernova (Luminosity 100).
+    \item \textbf{Shift 5:} We seek the True Ending again.
+    Options: \{1, 3\} (Luminosity $40$) or \{2\} (Luminosity $100$).
+    The single star \{2\} now outshines the others. Brightness \textbf{100}.
+    \item \textbf{Shift 6:} The Architect severs the bond between 2 and 3.
+    \item \textbf{Shift 7:} We gaze at Fragment 3. It is alone. The True Ending is simply itself. Brightness \textbf{30}.
+\end{itemize}
+
+\end{document}
