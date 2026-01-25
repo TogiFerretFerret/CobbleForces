@@ -12,7 +12,7 @@
 \maketitle
 
 \section*{Problem Overview}
-We are tasked with maintaining the **Maximum Weight Independent Set (MWIS)** of a dynamic forest under the following operations:
+We are tasked with maintaining the \textbf{Maximum Weight Independent Set (MWIS)} of a dynamic forest under the following operations:
 \begin{enumerate}
     \item \textbf{Link($u, v$):} Add an edge between two distinct trees.
     \item \textbf{Cut($u, v$):} Remove an existing edge.
@@ -21,16 +21,16 @@ We are tasked with maintaining the **Maximum Weight Independent Set (MWIS)** of 
 \end{enumerate}
 
 \section*{Difficulty Analysis}
-Rating: \textbf{4000+ (Legendary Grandmaster)}.
+Rating: \textbf{3500+ (Legendary Grandmaster)}.
 This problem represents the pinnacle of dynamic tree data structures and is likely the hardest problem in the contest.
 \begin{itemize}
-    \item Standard **Dynamic DP** (via Heavy-Light Decomposition) can handle weight updates but cannot handle structural changes (Link/Cut).
-    \item Standard **Link-Cut Trees** (LCT) handle structural changes but are designed for path aggregates. They cannot easily maintain subtree aggregates (like MWIS) because the "dashed edges" in an LCT are not dynamically aggregated in a way that supports non-invertible DP transitions efficiently without complex auxiliary structures.
+	\item Standard \textbf{Dynamic DP} (via Heavy-Light Decomposition) can handle weight updates but cannot handle structural changes (Link/Cut).
+	\item Standard \textbf{Link-Cut Tree} (LCT) handle structural changes but are designed for path aggregates. They cannot easily maintain subtree aggregates (like MWIS) because the "dashed edges" in an LCT are not dynamically aggregated in a way that supports non-invertible DP transitions efficiently without complex auxiliary structures.
 \end{itemize}
-To solve this, one must implement a **Self-Adjusting Top Tree** (specifically the Compress-Rake Cluster variant). This data structure generalizes LCTs to handle subtree aggregates dynamically by treating "Rake" operations (merging a subtree onto a path) as first-class citizens alongside "Compress" operations (merging paths).
+To solve this, one must implement a \textbf{Self-Adjusting Top Tree} (specifically the Compress-Rake Cluster variant). This data structure generalizes LCTs to handle subtree aggregates dynamically by treating "Rake" operations (merging a subtree onto a path) as first-class citizens alongside "Compress" operations (merging paths).
 
 \section*{Solution Approach}
-The core idea is to decompose the tree into **Clusters**. A cluster corresponds to a connected subgraph with at most two **Boundary Nodes** interacting with the rest of the tree.
+The core idea is to decompose the tree into \textbf{Clusters}. A cluster corresponds to a connected subgraph with at most two \textbf{Boundary Nodes} interacting with the rest of the tree.
 
 For MWIS, we define the state of a cluster $(u, v)$ (where $u, v$ are boundaries) using a $2 \times 2$ matrix $M$:
 $$ M[a][b] = \text{Max weight IS of cluster s.t. } u \text{ has state } a, v \text{ has state } b $$
@@ -55,6 +55,6 @@ This solution requires implementing a full Top Tree with:
     \item Ternary Splay operations (handling Left Compress, Right Compress, and Middle Rake children).
     \item `Access`, `Link`, and `Cut` operations that explicitly manage Rake edges.
 \end{itemize}
-A correct implementation typically exceeds 500 lines of C++. Due to the complexity, the time limit is set generously to 8.0s.
+A correct implementation typically exceeds 200 lines of C++. Due to the complexity, the time limit is set generously to 8.0s.
 
 \end{document}
