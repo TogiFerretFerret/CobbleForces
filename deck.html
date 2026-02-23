@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tuxedo InfinityBook Assembly Simulator</title>
+    <style>
+        body {
+            background-color: #0b1120;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: #e2e8f0;
+        }
+
+        /* The Laptop Deck */
+        .chassis {
+            background: #1e293b;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.1);
+            border: 1px solid #334155;
+            position: relative;
+        }
+
+        /* The Animated RGB Diffusion Layer */
+        .rgb-bed {
+            background: linear-gradient(135deg, #00f0ff, #ff007f, #7000ff, #00f0ff);
+            background-size: 300% 300%;
+            animation: rgb-wave 8s linear infinite;
+            padding: 3px; 
+            border-radius: 6px;
+            box-shadow: inset 0 5px 20px rgba(0,0,0,0.9);
+            position: relative;
+        }
+
+        @keyframes rgb-wave {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        /* The Structural Grid (Invisible to user, guides the Canvas) */
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(60, 1fr); 
+            gap: 4px;
+            width: 860px; /* Locked physical width */
+            position: relative;
+        }
+
+        /* Physical Key Outlines (Opacity 0 because Canvas draws them) */
+        .key {
+            height: 48px;
+            opacity: 0; /* Hidden, but dictates physical layout bounds */
+            pointer-events: none;
+        }
+
+        /* ---------------- ANSI ROW SPANS ---------------- */
+        /* Row 1 */
+        .k-esc { grid-column: span 4; } .k-f { grid-column: span 4; }
+        /* Row 2 */
+        .k-num { grid-column: span 4; } .k-backspace { grid-column: span 8; }
+        /* Row 3 */
+        .k-tab { grid-column: span 6; } .k-slash { grid-column: span 6; }
+        /* Row 4 */
+        .k-caps { grid-column: span 7; } .k-enter { grid-column: span 9; }
+        /* Row 5 */
+        .k-lshift { grid-column: span 9; } .k-rshift { grid-column: span 11; }
+        /* Row 6 (Fixed Arrow Cluster) */
+        .k-ctrl { grid-column: span 5; }
+        .k-fn { grid-column: span 4; }
+        .k-super { grid-column: span 5; } 
+        .k-alt { grid-column: span 5; }
+        .k-space { grid-column: span 21; }
+        .k-ralt { grid-column: span 4; }
+        .k-left { grid-column: span 5; }
+        .k-updown { grid-column: span 6; } /* Treated as one block for drawing */
+        .k-right { grid-column: span 5; }
+
+        /* The Main CNC Simulation Canvas */
+        #laser-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* The Physical Laser Beam */
+        #tool-head {
+            position: absolute;
+            left: -10px;
+            width: calc(100% + 20px);
+            height: 2px;
+            background-color: #fff;
+            box-shadow: 0 0 10px 3px #fff, 0 0 20px 8px #00f0ff;
+            pointer-events: none;
+            display: none;
+            z-index: 10;
+        }
+
+        .controls { margin-top: 30px; display: flex; gap: 15px; align-items: center; }
+        input[type="file"] { display: none; }
+        
+        .btn {
+            background: #0f172a; color: #38bdf8; border: 1px solid #38bdf8;
+            padding: 10px 20px; font-family: monospace; cursor: pointer;
+            border-radius: 6px; transition: all 0.2s; font-weight: bold; text-transform: uppercase;
+        }
+        .btn:hover { background: #38bdf8; color: #000; }
+        #status { color: #94a3b8; font-family: monospace; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+    <div class="chassis">
+        <div class="rgb-bed">
+            <canvas id="laser-canvas"></canvas>
+            
+            <div id="tool-head"></div>
+
+            <div class="keyboard" id="grid-map">
+                <div class="key k-esc" data-l="Esc"></div>
+                <div class="key k-f" data-l="F1"></div><div class="key k-f" data-l="F2"></div><div class="key k-f" data-l="F3"></div><div class="key k-f" data-l="F4"></div>
+                <div class="key k-f" data-l="F5"></div><div class="key k-f" data-l="F6"></div><div class="key k-f" data-l="F7"></div><div class="key k-f" data-l="F8"></div>
+                <div class="key k-f" data-l="F9"></div><div class="key k-f" data-l="F10"></div><div class="key k-f" data-l="F11"></div><div class="key k-f" data-l="F12"></div>
+                <div class="key k-f" data-l="PrtSc"></div><div class="key k-f" data-l="Del"></div>
+
+                <div class="key k-num" data-l="~"></div><div class="key k-num" data-l="1"></div><div class="key k-num" data-l="2"></div><div class="key k-num" data-l="3"></div>
+                <div class="key k-num" data-l="4"></div><div class="key k-num" data-l="5"></div><div class="key k-num" data-l="6"></div><div class="key k-num" data-l="7"></div>
+                <div class="key k-num" data-l="8"></div><div class="key k-num" data-l="9"></div><div class="key k-num" data-l="0"></div><div class="key k-num" data-l="-"></div>
+                <div class="key k-num" data-l="="></div><div class="key k-backspace" data-l="Backspace" data-align="right"></div>
+
+                <div class="key k-tab" data-l="Tab" data-align="left"></div>
+                <div class="key k-num" data-l="Q"></div><div class="key k-num" data-l="W"></div><div class="key k-num" data-l="E"></div><div class="key k-num" data-l="R"></div>
+                <div class="key k-num" data-l="T"></div><div class="key k-num" data-l="Y"></div><div class="key k-num" data-l="U"></div><div class="key k-num" data-l="I"></div>
+                <div class="key k-num" data-l="O"></div><div class="key k-num" data-l="P"></div><div class="key k-num" data-l="["></div><div class="key k-num" data-l="]"></div>
+                <div class="key k-slash" data-l="\" data-align="right"></div>
+
+                <div class="key k-caps" data-l="Caps" data-align="left"></div>
+                <div class="key k-num" data-l="A"></div><div class="key k-num" data-l="S"></div><div class="key k-num" data-l="D"></div><div class="key k-num" data-l="F"></div>
+                <div class="key k-num" data-l="G"></div><div class="key k-num" data-l="H"></div><div class="key k-num" data-l="J"></div><div class="key k-num" data-l="K"></div>
+                <div class="key k-num" data-l="L"></div><div class="key k-num" data-l=";"></div><div class="key k-num" data-l="'"></div>
+                <div class="key k-enter" data-l="Enter" data-align="right"></div>
+
+                <div class="key k-lshift" data-l="Shift" data-align="left"></div>
+                <div class="key k-num" data-l="Z"></div><div class="key k-num" data-l="X"></div><div class="key k-num" data-l="C"></div><div class="key k-num" data-l="V"></div>
+                <div class="key k-num" data-l="B"></div><div class="key k-num" data-l="N"></div><div class="key k-num" data-l="M"></div><div class="key k-num" data-l=","></div>
+                <div class="key k-num" data-l="."></div><div class="key k-num" data-l="/"></div>
+                <div class="key k-rshift" data-l="Shift" data-align="right"></div>
+
+                <div class="key k-ctrl" data-l="Ctrl" data-align="left"></div>
+                <div class="key k-fn" data-l="Fn"></div>
+                
+                <div class="key k-super" id="target-super"></div>
+
+                <div class="key k-alt" data-l="Alt"></div>
+                <div class="key k-space"></div>
+                <div class="key k-ralt" data-l="Alt"></div>
+                
+                <div class="key k-left" data-l="←"></div>
+                <div class="key k-updown" data-l="↑↓"></div>
+                <div class="key k-right" data-l="→"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <label class="btn">
+            <input type="file" id="svg-upload" accept=".svg,.png,.jpg" />
+            Upload Custom Keycap & Engrave
+        </label>
+        <span id="status">Factory ready. Upload an SVG.</span>
+    </div>
+
+    <script>
+        const gridMap = document.getElementById('grid-map');
+        const mainCanvas = document.getElementById('laser-canvas');
+        const ctx = mainCanvas.getContext('2d', { alpha: true });
+        
+        // Off-screen mask canvas for text/SVG buffering
+        const maskCanvas = document.createElement('canvas');
+        const maskCtx = maskCanvas.getContext('2d');
+        
+        const toolHead = document.getElementById('tool-head');
+        const statusText = document.getElementById('status');
+        let isSimulating = false;
+
+        function resizeCanvases() {
+            mainCanvas.width = gridMap.offsetWidth;
+            mainCanvas.height = gridMap.offsetHeight;
+            maskCanvas.width = mainCanvas.width;
+            maskCanvas.height = mainCanvas.height;
+        }
+
+        // Draw the rounded rectangles for the physical keycaps
+        function drawSolidBlackKeys() {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+            ctx.fillStyle = '#111111'; // Matte black ABS plastic
+
+            const keys = document.querySelectorAll('.key');
+            const mapRect = gridMap.getBoundingClientRect();
+
+            keys.forEach(key => {
+                const rect = key.getBoundingClientRect();
+                const x = rect.left - mapRect.left;
+                const y = rect.top - mapRect.top;
+                
+                // Special split for the Up/Down arrow key block
+                if (key.classList.contains('k-updown')) {
+                    roundRect(ctx, x, y, rect.width, (rect.height / 2) - 2, 4); ctx.fill();
+                    roundRect(ctx, x, y + (rect.height / 2) + 2, rect.width, (rect.height / 2) - 2, 4); ctx.fill();
+                } else {
+                    roundRect(ctx, x, y, rect.width, rect.height, 4); ctx.fill();
+                }
+
+                // Highlight the target Super key in the un-engraved state
+                if (key.id === 'target-super') {
+                    ctx.strokeStyle = '#00f0ff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            });
+        }
+
+        function roundRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
+
+        // Prepare the white text and SVG on the off-screen mask canvas
+        function prepareEngravingMask(customImg) {
+            maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+            maskCtx.fillStyle = '#ffffff';
+            maskCtx.font = '600 13px "Segoe UI", sans-serif';
+            maskCtx.textBaseline = 'middle';
+
+            const keys = document.querySelectorAll('.key');
+            const mapRect = gridMap.getBoundingClientRect();
+
+            keys.forEach(key => {
+                const rect = key.getBoundingClientRect();
+                const x = rect.left - mapRect.left;
+                const y = rect.top - mapRect.top;
+                const label = key.getAttribute('data-l');
+
+                if (key.id === 'target-super') {
+                    if (customImg) {
+                        const pad = 12;
+                        const tW = rect.width - pad * 2;
+                        const tH = rect.height - pad * 2;
+                        const scale = Math.min(tW / customImg.width, tH / customImg.height);
+                        const dW = customImg.width * scale;
+                        const dH = customImg.height * scale;
+                        maskCtx.drawImage(customImg, x + (rect.width - dW) / 2, y + (rect.height - dH) / 2, dW, dH);
+                    } else {
+                        maskCtx.textAlign = 'center';
+                        maskCtx.fillText("TUX", x + rect.width / 2, y + rect.height / 2);
+                    }
+                    return;
+                }
+
+                if (!label) return;
+
+                const align = key.getAttribute('data-align');
+                if (align === 'left') {
+                    maskCtx.textAlign = 'left';
+                    maskCtx.fillText(label, x + 12, y + rect.height / 2);
+                } else if (align === 'right') {
+                    maskCtx.textAlign = 'right';
+                    maskCtx.fillText(label, x + rect.width - 12, y + rect.height / 2);
+                } else if (key.classList.contains('k-updown')) {
+                    maskCtx.textAlign = 'center';
+                    maskCtx.fillText("↑", x + rect.width / 2, y + rect.height * 0.25);
+                    maskCtx.fillText("↓", x + rect.width / 2, y + rect.height * 0.75);
+                } else if (key.classList.contains('k-esc') || key.classList.contains('k-f')) {
+                    maskCtx.font = '600 11px "Segoe UI", sans-serif';
+                    maskCtx.textAlign = 'center';
+                    maskCtx.fillText(label, x + rect.width / 2, y + rect.height / 2);
+                    maskCtx.font = '600 13px "Segoe UI", sans-serif'; // reset
+                } else {
+                    maskCtx.textAlign = 'center';
+                    maskCtx.fillText(label, x + rect.width / 2, y + rect.height / 2);
+                }
+            });
+        }
+
+        // Initialize empty state
+        window.onload = () => {
+            resizeCanvases();
+            drawSolidBlackKeys();
+            prepareEngravingMask(null);
+        };
+
+        // --- SVG UPLOAD INTERCEPTOR ---
+        document.getElementById('svg-upload').addEventListener('change', function(e) {
+            if (isSimulating) return;
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            statusText.innerText = "Parsing vector geometry...";
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+                let dataUrl = event.target.result;
+
+                if (file.type === 'image/svg+xml') {
+                    try {
+                        const svgText = atob(dataUrl.split(',')[1]);
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(svgText, 'image/svg+xml');
+                        const svgEl = doc.documentElement;
+                        
+                        // Force a bounding box so the Canvas engine doesn't crash on 0x0 SVGs
+                        if (!svgEl.getAttribute('width')) svgEl.setAttribute('width', '500');
+                        if (!svgEl.getAttribute('height')) svgEl.setAttribute('height', '500');
+                        
+                        const serializer = new XMLSerializer();
+                        dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(serializer.serializeToString(svgEl))));
+                    } catch (err) {
+                        console.warn("Could not patch SVG.", err);
+                    }
+                }
+
+                const img = new Image();
+                img.onload = function() {
+                    if (img.width === 0) return statusText.innerText = "Error: Invalid image bounds.";
+                    startAssemblyLine(img);
+                };
+                img.src = dataUrl;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // The Full Keyboard Engraving Sweep
+        function startAssemblyLine(customImg) {
+            isSimulating = true;
+            resizeCanvases();
+            drawSolidBlackKeys();
+            prepareEngravingMask(customImg);
+            
+            toolHead.style.display = 'block';
+            statusText.innerText = "Engraving in progress...";
+            
+            const totalScanLines = mainCanvas.height;
+            let currentLine = 0;
+            const step = 4; // Raster sweep speed
+
+            // Set the main canvas to literally delete the black pixels wherever the mask has image data
+            ctx.globalCompositeOperation = 'destination-out';
+
+            function drawRasterFrame() {
+                toolHead.style.top = currentLine + 'px';
+
+                // Slice exactly 'step' pixels of height from the mask canvas and draw it to the main canvas
+                ctx.drawImage(maskCanvas, 0, currentLine, mainCanvas.width, step, 0, currentLine, mainCanvas.width, step);
+
+                currentLine += step;
+                
+                if (currentLine <= totalScanLines + step) {
+                    requestAnimationFrame(drawRasterFrame);
+                } else {
+                    toolHead.style.display = 'none';
+                    isSimulating = false;
+                    statusText.innerText = "Assembly Complete. Custom hardware verified.";
+                }
+            }
+            drawRasterFrame();
+        }
+    </script>
+</body>
+</html>
