@@ -1,7 +1,7 @@
 import sqlite3
 import os
 from werkzeug.security import generate_password_hash
-DB-PATH=os.path.join(os.path.dirname(__file__),"users.db")
+DB_PATH = os.path.join(os.path.dirname(__file__), "../../users.db")
 def get_db():
     """Returns a database connection"""
     conn = sqlite3.connect(DB_PATH)
@@ -57,3 +57,44 @@ def verify_login(username:str, password:str)->None|dict:
     if check_password_hash(user["password_hash"], password):
         return dict(user)
     return None
+def get_user(username:str)->None|dict:
+    """get user by username without pwd checks (removing the pwd hash)"""
+    conn = get_db()
+    cursor=conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+    user = cursor.fetchone()
+    conn.close()
+    if not user:
+        return None
+    user_dict = dict(user)
+    user_dict.pop("password_hash", None)
+    return user_dict
+def update_user_rating(username:str, new_rating:int):
+    """Update the rating of a user."""
+    conn = get_db()
+    cursor = conn.cursor()
+    if rated_participations is not None:
+        cursor.execute("""
+            UPDATE users SET rating = ?, rated_participations = ?
+            WHERE username = ?
+        """, (new_rating, rated_participations, username))
+    else:
+        cursor.execute("""
+            UPDATE users SET rating = ?
+            WHERE username = ?
+        """, (new_rating, username))
+    
+    conn.commit()
+    conn.close()
+def get_all_users():
+    """Returns a list of all users in the database (without password hashes)"""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users ORDER BY rating DESC")
+    users = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    # pop the password hashes from the user dicts
+    for user in users:
+        user.pop("password_hash", None)
+        # tthis increases security not much but makes me feel bette
+    return users
