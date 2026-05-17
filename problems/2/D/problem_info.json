@@ -1,6 +1,0 @@
-{
-    "rating": 3000,
-    "time_limit": "2.0s",
-    "memory_limit": "256MB",
-    "tags": ["DP", "Convex Hull Trick", "WQS Binary Search", "Divide and Conquer Optimization"]
-}
